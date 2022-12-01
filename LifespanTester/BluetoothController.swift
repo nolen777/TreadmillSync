@@ -9,17 +9,76 @@ import Foundation
 import CoreBluetooth
 
 class LifeSpanSession: NSObject, CBPeripheralDelegate {
-    let commands: [(String, [UInt8])] = [
-        ("steps", [0xA1, 0x88, 0x00, 0x00, 0x00])
+    lazy var commands: [(String, [UInt8], (Data) -> Any)] = [
+        ("distance", [0xA1, 0x85, 0x00, 0x00, 0x00], toDecimal),
+        ("calories", [0xA1, 0x87, 0x00, 0x00, 0x00], toUInt16),
+        ("steps", [0xA1, 0x88, 0x00, 0x00, 0x00], toUInt16),
+        ("time", [0xA1, 0x89, 0x00, 0x00, 0x00], toSeconds),
     ]
     
-    var currentCommand: Int = 0
+    var currentCommandIndex: Int = 0
     let peripheral: CBPeripheral
+    let characteristic: CBCharacteristic
                    
-    init(peripheral: CBPeripheral) {
+    init(peripheral: CBPeripheral, characteristic: CBCharacteristic) {
         self.peripheral = peripheral
+        self.characteristic = characteristic
+        super.init()
+        peripheral.delegate = self
+        peripheral.setNotifyValue(true, for: characteristic)
     }
     
+    func startCommands() -> Void {
+        currentCommandIndex = 0
+        sendNextCommand()
+    }
+    
+    func sendNextCommand() {
+        if currentCommandIndex < commands.count {
+            let command = commands[currentCommandIndex]
+            let name = command.0
+            let msg = Data(command.1)
+            peripheral.writeValue(msg, for: characteristic, type: CBCharacteristicWriteType.withResponse)
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        let command = commands[currentCommandIndex]
+        guard let value = characteristic.value else {
+            print("unable to fetch data for \(command.0)")
+            return
+        }
+        print("key \(commands[currentCommandIndex].0): \(command.2(value))")
+        currentCommandIndex = currentCommandIndex + 1
+        sendNextCommand()
+    }
+    
+    func toUInt16(_ responseData: Data) -> UInt16 {
+        let bytes = responseData.subdata(in: 2..<4)
+        return UInt16(bytes[0]) << 8 | UInt16(bytes[1])
+    }
+    
+    func toDecimal(_ responseData: Data) -> Decimal {
+        let wholeByte = responseData[2]
+        let fracByte = responseData[3]
+        
+        return Decimal(wholeByte) + Decimal(fracByte) / 100
+    }
+    
+    func toSeconds(_ responseData: Data) -> Int {
+        let hours = Int(responseData[2])
+        let minutes = Int(responseData[3])
+        let seconds = Int(responseData[4])
+        
+        return 3600 * hours + 60 * minutes + seconds
+    }
+    
+    
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+    }
 }
 
 class BluetoothController: NSObject {
@@ -29,7 +88,7 @@ class BluetoothController: NSObject {
     var lifespanUUID: UUID?
     var selectedPeripheral: CBPeripheral?
     var currentName: String?
-
+    var session: LifeSpanSession?
     
     func setUp() {
         centralManager = CBCentralManager(delegate: self, queue: nil)
@@ -97,23 +156,24 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
                 print("UUID: \(ch.uuid)")
                 
                 if ch.uuid.uuidString == "FFF1" {
-                    
-                    DispatchQueue.global(qos: DispatchQoS.QoSClass.utility).async {
-                        for command in self.commands {
-                            let name = command.key
-                            let msg = Data(command.value)
-                            peripheral.setNotifyValue(true, for: ch)
-                            if (ch.properties.contains(.write)) {
-                                print("this one is writable")
-                                peripheral.writeValue(msg, for: ch, type: CBCharacteristicWriteType.withResponse)
-                            }
-                            
-                            //                            if (ch.properties.contains(.writeWithoutResponse)) {
-                            //                                print("this one is writable without response")
-                            //                                peripheral.writeValue(msg, for: ch, type: CBCharacteristicWriteType.withoutResponse)
-                            //                            }
-                        }
-                    }
+                    session = LifeSpanSession(peripheral: peripheral, characteristic: ch)
+                    session?.startCommands()
+//                    DispatchQueue.global(qos: DispatchQoS.QoSClass.utility).async {
+//                        for command in self.commands {
+//                            let name = command.key
+//                            let msg = Data(command.value)
+//                            peripheral.setNotifyValue(true, for: ch)
+//                            if (ch.properties.contains(.write)) {
+//                                print("this one is writable")
+//                                peripheral.writeValue(msg, for: ch, type: CBCharacteristicWriteType.withResponse)
+//                            }
+//
+//                            //                            if (ch.properties.contains(.writeWithoutResponse)) {
+//                            //                                print("this one is writable without response")
+//                            //                                peripheral.writeValue(msg, for: ch, type: CBCharacteristicWriteType.withoutResponse)
+//                            //                            }
+//                        }
+//                    }
                     //                print(ch.properties)
                     //                if ch.isNotifying {
                     //                    print("this one is notifying")
@@ -140,20 +200,5 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
             }
         }
     }
-    
-    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
-        print("aha!")
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        print("Got updated value \(characteristic.value) for \(characteristic.uuid)")
-        if let value = characteristic.value, value.count == 4 {
-            let num = Int(value[0]) << 8 + Int(value[1])
-            print("Got \(num)")
-        }
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-        //   peripheral.readValue(for: characteristic)
-    }
+
 }
