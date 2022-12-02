@@ -28,66 +28,6 @@ func toSeconds(_ responseData: Data) -> Int {
     return 3600 * hours + 60 * minutes + seconds
 }
 
-class LifeSpanSession: NSObject, CBPeripheralDelegate {
-    let commands: [(description: String, command: [UInt8], processor: (Data) -> Any)] = [
-        ("speedInMph", [0xA1, 0x82, 0x00, 0x00, 0x00], toDecimal),
-        ("distanceInMiles", [0xA1, 0x85, 0x00, 0x00, 0x00], toDecimal),
-        ("calories", [0xA1, 0x87, 0x00, 0x00, 0x00], toUInt16),
-        ("steps", [0xA1, 0x88, 0x00, 0x00, 0x00], toUInt16),
-        ("timeInSeconds", [0xA1, 0x89, 0x00, 0x00, 0x00], toSeconds),
-    ]
-    
-    var currentCommandIndex: Int = 0
-    var responseDict = [String : Any]()
-    let peripheral: CBPeripheral
-    let characteristic: CBCharacteristic
-    
-    init(peripheral: CBPeripheral, characteristic: CBCharacteristic) {
-        self.peripheral = peripheral
-        self.characteristic = characteristic
-        super.init()
-        peripheral.delegate = self
-        peripheral.setNotifyValue(true, for: characteristic)
-    }
-    
-    func startCommands() -> Void {
-        currentCommandIndex = 0
-        sendNextCommand()
-    }
-    
-    func sendNextCommand() {
-        if currentCommandIndex < commands.count {
-            let command = commands[currentCommandIndex]
-            peripheral.writeValue(Data(command.command), for: characteristic, type: CBCharacteristicWriteType.withResponse)
-        } else {
-            let json = try! JSONSerialization.data(withJSONObject: responseDict)
-            print("complete dictionary:")
-            print("\(String(decoding: json, as: UTF8.self))")
-        }
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        let command = commands[currentCommandIndex]
-        guard let value = characteristic.value else {
-            print("unable to fetch data for \(command.0)")
-            return
-        }
-        let key = command.description
-        let response = command.processor(value)
-        responseDict[key] = response
-        currentCommandIndex = currentCommandIndex + 1
-        sendNextCommand()
-    }
-    
-    
-    
-    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
-    }
-}
-
 class BluetoothController: NSObject {
     private var centralManager: CBCentralManager!
     
@@ -97,14 +37,90 @@ class BluetoothController: NSObject {
     let service3CBUUID: CBUUID = CBUUID(string: "49535343-026E-3A9B-954C-97DAEF17E26E")
     let service4CBUUID: CBUUID = CBUUID(string: "93D7427A-DA79-EC65-48AD-201EBE53A848")
     
-    var peripherals = Set<CBPeripheral>()
     var lifespanUUID: UUID?
-    var selectedPeripheral: CBPeripheral?
     var currentName: String?
     var session: LifeSpanSession?
     
     func setUp() {
         centralManager = CBCentralManager(delegate: self, queue: nil)
+    }
+    
+    class LifeSpanSession: NSObject, CBPeripheralDelegate {
+        let commands: [(description: String, command: [UInt8], processor: (Data) -> Any)] = [
+            ("speedInMph", [0xA1, 0x82, 0x00, 0x00, 0x00], toDecimal),
+            ("distanceInMiles", [0xA1, 0x85, 0x00, 0x00, 0x00], toDecimal),
+            ("calories", [0xA1, 0x87, 0x00, 0x00, 0x00], toUInt16),
+            ("steps", [0xA1, 0x88, 0x00, 0x00, 0x00], toUInt16),
+            ("timeInSeconds", [0xA1, 0x89, 0x00, 0x00, 0x00], toSeconds),
+        ]
+        
+        var currentCommandIndex: Int = 0
+        var responseDict = [String : Any]()
+        let finishedCallback: (CBPeripheral) -> Void
+        let peripheral: CBPeripheral
+        var characteristic: CBCharacteristic?
+        
+        init(peripheral: CBPeripheral, callback: @escaping (CBPeripheral) -> Void) {
+            self.peripheral = peripheral
+            self.finishedCallback = callback
+            super.init()
+            peripheral.delegate = self
+        }
+        
+        func startCommands() -> Void {
+            currentCommandIndex = 0
+            sendNextCommand()
+        }
+        
+        func run() -> Void {
+            peripheral.discoverServices(nil)
+        }
+        
+        func sendNextCommand() {
+            if currentCommandIndex < commands.count {
+                let command = commands[currentCommandIndex]
+                peripheral.writeValue(Data(command.command), for: characteristic!, type: CBCharacteristicWriteType.withResponse)
+            } else {
+                let json = try! JSONSerialization.data(withJSONObject: responseDict)
+                print("complete dictionary:")
+                print("\(String(decoding: json, as: UTF8.self))")
+                finishedCallback(peripheral)
+            }
+        }
+        
+        func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+            if let services = peripheral.services {
+                for service in services {
+                    peripheral.discoverCharacteristics(nil, for: service)
+                }
+            }
+        }
+        
+        func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+            if let characteristics = service.characteristics {
+                for ch in characteristics {
+                    
+                    if ch.uuid.uuidString == "FFF1" {
+                        characteristic = ch
+                        peripheral.setNotifyValue(true, for: ch)
+                        startCommands()
+                    }
+                }
+            }
+        }
+        
+        func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+            let command = commands[currentCommandIndex]
+            guard let value = characteristic.value else {
+                print("unable to fetch data for \(command.0)")
+                return
+            }
+            let key = command.description
+            let response = command.processor(value)
+            responseDict[key] = response
+            currentCommandIndex = currentCommandIndex + 1
+            sendNextCommand()
+        }
     }
 }
 
@@ -138,41 +154,20 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        if !peripherals.contains(peripheral) {
-            peripherals.insert(peripheral)
-            
-            if peripheral.name == "LifeSpan" {
-                lifespanUUID = peripheral.identifier
-                centralManager.connect(peripheral)
-            }
+        if peripheral.name == "LifeSpan" {
+            lifespanUUID = peripheral.identifier
+            session = LifeSpanSession(peripheral: peripheral, callback: sessionFinished)
+            centralManager.connect(peripheral)
         }
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
-        peripheral.delegate = self
-        selectedPeripheral = peripheral
-        peripheral.discoverServices(nil)//[serviceCBUUID])
+        session?.run()
     }
     
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        if let services = peripheral.services {
-            for service in services {
-                peripheral.discoverCharacteristics(nil, for: service)
-            }
-        }
+    func sessionFinished(peripheral: CBPeripheral) {
+        centralManager.cancelPeripheralConnection(peripheral)
+        session = nil
     }
-    
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        if let characteristics = service.characteristics {
-            for ch in characteristics {
-                
-                if ch.uuid.uuidString == "FFF1" {
-                    session = LifeSpanSession(peripheral: peripheral, characteristic: ch)
-                    session?.startCommands()
-                }
-            }
-        }
-    }
-    
 }
