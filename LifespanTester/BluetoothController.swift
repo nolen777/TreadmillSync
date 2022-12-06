@@ -105,28 +105,48 @@ class BluetoothController: NSObject {
         peripheralManager = CBPeripheralManager(delegate: virtualPeripheral, queue: nil)
     }
     
+    class LifeSpanCommand {
+        let description: String
+        let commandData: Data
+        let responseProcessor: (Data) -> Any
+        
+        init(description: String, commandData: Data, responseProcessor: @escaping (Data) -> Any) {
+            self.description = description
+            self.commandData = commandData
+            self.responseProcessor = responseProcessor
+        }
+        
+        convenience init?(description: String, commandHexString: String, responseProcessor: @escaping (Data) -> Any) {
+            guard let commandData = fromHexString(commandHexString) else {
+                return nil
+            }
+            self.init(description: description, commandData: commandData, responseProcessor: responseProcessor)
+        }
+    }
+    
     class LifeSpanSession: NSObject, CBPeripheralDelegate {
         enum LifeSpanSessionError: Error {
             case invalidSpeed
         }
         
-        let queryCommands: [(description: String, command: Data, processor: (Data) -> Any)] = [
-            ("unknown91", fromHexString("a191000000")!, toUInt16),
-            ("unknown81", fromHexString("a181000000")!, toUInt16),
-            ("unknown61", fromHexString("a161000000")!, toUInt16),
-            ("unknown62", fromHexString("a162000000")!, toUInt16),
-            ("speedInMph", fromHexString("a182000000")!, toDecimal),
-            ("distanceInMiles", fromHexString("a185000000")!, toDecimal),
-            ("calories", fromHexString("a187000000")!, toUInt16),
-            ("steps", fromHexString("a188000000")!, toUInt16),
-            ("timeInSeconds", fromHexString("a189000000")!, toSeconds),
-            ("unknown8B", fromHexString("a18b000000")!, toSeconds),
-            ("unknown89", fromHexString("a189000000")!, toSeconds),
-            ("unknown86", fromHexString("a186000000")!, toSeconds),
-            ("unknown63", fromHexString("a163000000")!, toSeconds),
-            ("unknown64", fromHexString("a164000000")!, toSeconds),
-            ("reset", fromHexString("e200000000")!, toSeconds),
+        let queryCommands: [LifeSpanCommand] = [
+            LifeSpanCommand(description: "unknown91", commandHexString: "a191000000", responseProcessor: toUInt16)!,
+            LifeSpanCommand(description: "unknown81", commandHexString: "a181000000", responseProcessor: toUInt16)!,
+            LifeSpanCommand(description: "unknown61", commandHexString: "a161000000", responseProcessor: toUInt16)!,
+            LifeSpanCommand(description: "unknown62", commandHexString: "a162000000", responseProcessor: toUInt16)!,
+            LifeSpanCommand(description: "speedInMph", commandHexString: "a182000000", responseProcessor: toDecimal)!,
+            LifeSpanCommand(description: "distanceInMiles", commandHexString: "a185000000", responseProcessor: toDecimal)!,
+            LifeSpanCommand(description: "calories", commandHexString: "a187000000", responseProcessor: toUInt16)!,
+            LifeSpanCommand(description: "steps", commandHexString: "a188000000", responseProcessor: toUInt16)!,
+            LifeSpanCommand(description: "timeInSeconds", commandHexString: "a189000000", responseProcessor: toSeconds)!,
+            LifeSpanCommand(description: "unknown8B", commandHexString: "a18b000000", responseProcessor: toSeconds)!,
+            LifeSpanCommand(description: "unknown89", commandHexString: "a189000000", responseProcessor: toSeconds)!,
+            LifeSpanCommand(description: "unknown86", commandHexString: "a186000000", responseProcessor: toSeconds)!,
+            LifeSpanCommand(description: "unknown63", commandHexString: "a163000000", responseProcessor: toSeconds)!,
+            LifeSpanCommand(description: "unknown64", commandHexString: "a164000000", responseProcessor: toSeconds)!,
         ]
+        
+        let resetCommand = LifeSpanCommand(description: "reset", commandHexString: "e200000000", responseProcessor: toSeconds)!
         
         let startCommand: [UInt8] = [0xE1, 0x00, 0x00, 0x00, 0x00]
         let stopCommand: [UInt8] = [0xE0, 0x00, 0x00, 0x00, 0x00]
@@ -166,7 +186,7 @@ class BluetoothController: NSObject {
         func sendNextCommand() {
             if currentCommandIndex < queryCommands.count {
                 let command = queryCommands[currentCommandIndex]
-                peripheral.writeValue(Data(command.command), for: characteristic1!, type: CBCharacteristicWriteType.withResponse)
+                peripheral.writeValue(command.commandData, for: characteristic1!, type: CBCharacteristicWriteType.withResponse)
             } else {
                 let json = try! JSONSerialization.data(withJSONObject: responseDict)
                 print("complete dictionary:")
@@ -209,7 +229,7 @@ class BluetoothController: NSObject {
             } else {
                 let command = queryCommands[currentCommandIndex]
                 let key = command.description
-                let response = command.processor(value)
+                let response = command.responseProcessor(value)
                 responseDict[key] = response
                 currentCommandIndex = currentCommandIndex + 1
                 sendNextCommand()
