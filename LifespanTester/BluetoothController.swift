@@ -273,7 +273,6 @@ class BluetoothController: NSObject {
         func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
             if let services = peripheral.services {
                 for service in services {
-                    print("service uuid: \(service.uuid.uuidString)")
                     peripheral.discoverCharacteristics(nil, for: service)
                 }
             }
@@ -282,12 +281,9 @@ class BluetoothController: NSObject {
         func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
             if let characteristics = service.characteristics {
                 for ch in characteristics {
-                    print("service \(service.uuid.uuidString)")
                     if ch.uuid.uuidString == "FFF1" {
-                        print("characteristic \(ch)")
                         characteristic1 = ch
                         peripheral.setNotifyValue(true, for: ch)
-                        //   startCommands()
                     } else if ch.uuid.uuidString == "FFF2" {
                         characteristic2 = ch
                         peripheral.writeValue(fromHexString("0200000000")!, for: ch, type: CBCharacteristicWriteType.withResponse)
@@ -301,15 +297,12 @@ class BluetoothController: NSObject {
                 print("unable to fetch data")
                 return
             }
-            print("Received value \(value.hexEncodedString()) for characteristic \(characteristic.uuid.uuidString)")
             if value == fromHexString("02aa11180000")! {
                 peripheral.writeValue(fromHexString("c000000000")!, for: characteristic2, type: CBCharacteristicWriteType.withResponse)
             } else if value == fromHexString("c0ff00000000") {
-                
                 startCommands()
             } else {
                 let command = queryCommands[currentCommandIndex]
-                print("command \(command.description) \(command.command.hexEncodedString())")
                 let key = command.description
                 let response = command.processor(value)
                 responseDict[key] = response
