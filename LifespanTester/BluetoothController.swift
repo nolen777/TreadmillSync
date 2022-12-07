@@ -28,25 +28,6 @@ class BluetoothController: NSObject {
         peripheralManager = CBPeripheralManager(delegate: virtualPeripheral, queue: nil)
     }
     
-    class LifeSpanCommand {
-        let description: String
-        let commandData: Data
-        let responseProcessor: (Data) -> Any
-        
-        init(description: String, commandData: Data, responseProcessor: @escaping (Data) -> Any) {
-            self.description = description
-            self.commandData = commandData
-            self.responseProcessor = responseProcessor
-        }
-        
-        convenience init?(description: String, commandHexString: String, responseProcessor: @escaping (Data) -> Any) {
-            guard let commandData = Data(hexString: commandHexString) else {
-                return nil
-            }
-            self.init(description: description, commandData: commandData, responseProcessor: responseProcessor)
-        }
-    }
-    
     class LifeSpanSession: NSObject, CBPeripheralDelegate {
         enum LifeSpanSessionError: Error {
             case invalidSpeed
