@@ -41,71 +41,71 @@ class LifeSpanPeripheral: NSObject, CBPeripheralManagerDelegate {
                 switch (value.hexEncodedString()) {
                     case "0200000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("02aa11180000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "02aa11180000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "c000000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("c0ff00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "c0ff00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a191000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1aa05000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1aa05000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a181000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a161000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1ff00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1ff00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a162000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a187000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1aa06700000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1aa06700000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a182000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                         
                     case "a185000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1aa0d080000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1aa0d080000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a188000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1aa09280300")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1aa09280300")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a18b000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a189000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1aa09280300")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1aa09280300")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a186000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a163000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1ff00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1ff00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     case "a164000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1ff00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1ff00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                         
                     case "e200000000":
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("e2aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "e2aa00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                     
                     default:
                         peripheral.respond(to: request, withResult: CBATTError.success)
-                        peripheral.updateValue(fromHexString("a1ff00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
+                        peripheral.updateValue(Data(hexString: "a1ff00000000")!, for: mainCharacteristic, onSubscribedCentrals: [request.central])
                 }
             }
         }

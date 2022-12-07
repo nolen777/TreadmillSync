@@ -9,30 +9,21 @@ import Foundation
 import CoreBluetooth
 
 class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
-    let serviceUUID = CBUUID(string: "b0779ed8-f74a-44f5-a9bf-eeb0c76a502e")
-    let characteristicUUID = CBUUID(string: "1bc63fa8-b79d-461c-8cf3-839fc5fba809")
-    
     var transferService: CBMutableService!
     var transferCharacteristic: CBMutableCharacteristic!
     var peripheralManager: CBPeripheralManager!
     
-    var value: Data? {
-        get {
-            return transferCharacteristic.value
-        }
-        set(newValue) {
-            transferCharacteristic.value = newValue
-            peripheralManager.updateValue(newValue ?? Data(), for: transferCharacteristic, onSubscribedCentrals: nil)
-        }
-    }
+    var connectedCentral: CBCentral?
+    
+    var values = [[String : Any]]()
     
     private func setUpPeripheral() {
-        let transferCharacteristic = CBMutableCharacteristic(type: characteristicUUID,
+        let transferCharacteristic = CBMutableCharacteristic(type: PhoneSyncService.characteristicUUID,
                                                              properties: [.notify, .writeWithoutResponse],
                                                              value: nil,
                                                              permissions: [.readable, .writeable])
         
-        let transferService = CBMutableService(type: serviceUUID, primary: true)
+        let transferService = CBMutableService(type: PhoneSyncService.serviceUUID, primary: true)
         transferService.characteristics = [transferCharacteristic]
         peripheralManager.add(transferService)
         
@@ -42,6 +33,14 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
     
     private func stopPeripheral() {
         peripheralManager.removeAllServices()
+    }
+    
+    private func sendData() {
+        guard let transferCharacteristic = transferCharacteristic else {
+            return
+        }
+        
+        
     }
     
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {
@@ -98,6 +97,10 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
     
     func peripheralManager(_ peripheral: CBPeripheralManager, central: CBCentral, didSubscribeTo characteristic: CBCharacteristic) {
         print("did subscribe to \(characteristic.uuid.uuidString)")
+        
+        connectedCentral = central
+        
+        sendData()
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didOpen channel: CBL2CAPChannel?, error: Error?) {
@@ -106,5 +109,6 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
     
     func peripheralManagerIsReady(toUpdateSubscribers peripheral: CBPeripheralManager) {
         print("ready to update")
+        sendData()
     }
 }

@@ -8,49 +8,6 @@
 import Foundation
 import CoreBluetooth
 
-func toUInt16(_ responseData: Data) -> UInt16 {
-    let bytes = responseData.subdata(in: 2..<4)
-    return UInt16(bytes[0]) << 8 | UInt16(bytes[1])
-}
-
-func toDecimal(_ responseData: Data) -> Decimal {
-    let wholeByte = responseData[2]
-    let fracByte = responseData[3]
-    
-    return Decimal(wholeByte) + Decimal(fracByte) / 100
-}
-
-func toSeconds(_ responseData: Data) -> Int {
-    let hours = Int(responseData[2])
-    let minutes = Int(responseData[3])
-    let seconds = Int(responseData[4])
-    
-    return 3600 * hours + 60 * minutes + seconds
-}
-
-func fromHexString(_ str: String) -> Data? {
-    var md = Data(capacity: str.count / 2)
-    var currentByte: UInt8?
-    for c in str {
-        guard let nibble = c.hexDigitValue else {
-            print("Uh oh!")
-            return nil
-        }
-        
-        if let existingByte = currentByte {
-            md.append(existingByte | UInt8(nibble))
-            currentByte = nil
-        } else {
-            currentByte = UInt8(nibble) << 4
-        }
-    }
-    guard currentByte == nil else {
-        print("Bad nibble!")
-        return nil
-    }
-    return md
-}
-
 extension Data {
     struct HexEncodingOptions: OptionSet {
         let rawValue: Int
@@ -62,10 +19,18 @@ extension Data {
         return self.map { String(format: format, $0) }.joined()
     }
     
-    init?(fromHexString str: String) {
-        self.init(capacity: str.count / 2)
+    init?(hexString str: String) {
+        var unprefixedStr: String
+        if str.hasPrefix("0x") || str.hasPrefix("0X") {
+            unprefixedStr = String(str.dropFirst(2))
+        } else if str.hasPrefix("x") || str.hasPrefix("X") {
+            unprefixedStr = String(str.dropFirst(1))
+        } else {
+            unprefixedStr = str
+        }
+        self.init(capacity: unprefixedStr.count / 2)
         var currentByte: UInt8?
-        for c in str {
+        for c in unprefixedStr {
             guard let nibble = c.hexDigitValue else {
                 print("Uh oh!")
                 return nil
@@ -117,7 +82,7 @@ class BluetoothController: NSObject {
         }
         
         convenience init?(description: String, commandHexString: String, responseProcessor: @escaping (Data) -> Any) {
-            guard let commandData = fromHexString(commandHexString) else {
+            guard let commandData = Data(hexString: commandHexString) else {
                 return nil
             }
             self.init(description: description, commandData: commandData, responseProcessor: responseProcessor)
@@ -128,25 +93,6 @@ class BluetoothController: NSObject {
         enum LifeSpanSessionError: Error {
             case invalidSpeed
         }
-        
-        let queryCommands: [LifeSpanCommand] = [
-            LifeSpanCommand(description: "unknown91", commandHexString: "a191000000", responseProcessor: toUInt16)!,
-            LifeSpanCommand(description: "unknown81", commandHexString: "a181000000", responseProcessor: toUInt16)!,
-            LifeSpanCommand(description: "unknown61", commandHexString: "a161000000", responseProcessor: toUInt16)!,
-            LifeSpanCommand(description: "unknown62", commandHexString: "a162000000", responseProcessor: toUInt16)!,
-            LifeSpanCommand(description: "speedInMph", commandHexString: "a182000000", responseProcessor: toDecimal)!,
-            LifeSpanCommand(description: "distanceInMiles", commandHexString: "a185000000", responseProcessor: toDecimal)!,
-            LifeSpanCommand(description: "calories", commandHexString: "a187000000", responseProcessor: toUInt16)!,
-            LifeSpanCommand(description: "steps", commandHexString: "a188000000", responseProcessor: toUInt16)!,
-            LifeSpanCommand(description: "timeInSeconds", commandHexString: "a189000000", responseProcessor: toSeconds)!,
-            LifeSpanCommand(description: "unknown8B", commandHexString: "a18b000000", responseProcessor: toSeconds)!,
-            LifeSpanCommand(description: "unknown89", commandHexString: "a189000000", responseProcessor: toSeconds)!,
-            LifeSpanCommand(description: "unknown86", commandHexString: "a186000000", responseProcessor: toSeconds)!,
-            LifeSpanCommand(description: "unknown63", commandHexString: "a163000000", responseProcessor: toSeconds)!,
-            LifeSpanCommand(description: "unknown64", commandHexString: "a164000000", responseProcessor: toSeconds)!,
-        ]
-        
-        let resetCommand = LifeSpanCommand(description: "reset", commandHexString: "e200000000", responseProcessor: toSeconds)!
         
         let startCommand: [UInt8] = [0xE1, 0x00, 0x00, 0x00, 0x00]
         let stopCommand: [UInt8] = [0xE0, 0x00, 0x00, 0x00, 0x00]
@@ -162,12 +108,12 @@ class BluetoothController: NSObject {
         
         var currentCommandIndex: Int = 0
         var responseDict = [String : Any]()
-        let finishedCallback: (CBPeripheral, Data) -> Void
+        let finishedCallback: (CBPeripheral, [String: Any]) -> Void
         let peripheral: CBPeripheral
         var characteristic1: CBCharacteristic!
         var characteristic2: CBCharacteristic!
         
-        init(peripheral: CBPeripheral, callback: @escaping (CBPeripheral, Data) -> Void) {
+        init(peripheral: CBPeripheral, callback: @escaping (CBPeripheral, [String: Any]) -> Void) {
             self.peripheral = peripheral
             self.finishedCallback = callback
             super.init()
@@ -184,18 +130,18 @@ class BluetoothController: NSObject {
         }
         
         func sendNextCommand() {
-            if currentCommandIndex < queryCommands.count {
-                let command = queryCommands[currentCommandIndex]
+            if currentCommandIndex < LifeSpanCommands.queryCommands.count {
+                let command = LifeSpanCommands.queryCommands[currentCommandIndex]
                 peripheral.writeValue(command.commandData, for: characteristic1!, type: CBCharacteristicWriteType.withResponse)
             } else {
-                let json = try! JSONSerialization.data(withJSONObject: responseDict)
                 print("complete dictionary:")
-                print("\(String(decoding: json, as: UTF8.self))")
-                finishedCallback(peripheral, json)
+                print("\(responseDict)")
+                finishedCallback(peripheral, responseDict)
             }
         }
         
         func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+            responseDict["timestamp"] = Date.now
             if let services = peripheral.services {
                 for service in services {
                     peripheral.discoverCharacteristics(nil, for: service)
@@ -211,7 +157,7 @@ class BluetoothController: NSObject {
                         peripheral.setNotifyValue(true, for: ch)
                     } else if ch.uuid.uuidString == "FFF2" {
                         characteristic2 = ch
-                        peripheral.writeValue(fromHexString("0200000000")!, for: ch, type: CBCharacteristicWriteType.withResponse)
+                        peripheral.writeValue(Data(hexString: "0200000000")!, for: ch, type: CBCharacteristicWriteType.withResponse)
                     }
                 }
             }
@@ -222,12 +168,12 @@ class BluetoothController: NSObject {
                 print("unable to fetch data")
                 return
             }
-            if value == fromHexString("02aa11180000")! {
-                peripheral.writeValue(fromHexString("c000000000")!, for: characteristic2, type: CBCharacteristicWriteType.withResponse)
-            } else if value == fromHexString("c0ff00000000") {
+            if value == Data(hexString: "02aa11180000")! {
+                peripheral.writeValue(Data(hexString: "c000000000")!, for: characteristic2, type: CBCharacteristicWriteType.withResponse)
+            } else if value == Data(hexString: "c0ff00000000") {
                 startCommands()
             } else {
-                let command = queryCommands[currentCommandIndex]
+                let command = LifeSpanCommands.queryCommands[currentCommandIndex]
                 let key = command.description
                 let response = command.responseProcessor(value)
                 responseDict[key] = response
@@ -278,8 +224,8 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
         session?.run()
     }
     
-    func sessionFinished(peripheral: CBPeripheral, jsonData: Data) {
-        virtualPeripheral.value = jsonData
+    func sessionFinished(peripheral: CBPeripheral, dict: [String: Any]) {
+        virtualPeripheral.values.append(dict)
         centralManager.cancelPeripheralConnection(peripheral)
         centralManager.stopScan()
         
