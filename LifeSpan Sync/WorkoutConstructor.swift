@@ -7,11 +7,14 @@
 
 import Foundation
 import HealthKit
+import UserNotifications
 
-class WorkoutConstructor {
+class WorkoutConstructor: NSObject, UNUserNotificationCenterDelegate {
     let store = HKHealthStore()
+    var notificationsAllowed = false
     
-    init() {
+    override init() {
+        super.init()
         DispatchQueue.main.async {
             let workoutStatus = self.store.authorizationStatus(for: HKWorkoutType.workoutType())
             let stepStatus = self.store.authorizationStatus(for: HKObjectType.quantityType(forIdentifier: .stepCount)!)
@@ -21,6 +24,15 @@ class WorkoutConstructor {
                         fatalError("Failed to authorize HealthKit access with error \(String(describing: error))")
                     }
                 }
+            }
+            
+            let center = UNUserNotificationCenter.current()
+            center.requestAuthorization(options: [.alert]) { granted, error in
+                if let error = error {
+                    print("Error requesting notification authorization \(error)")
+                }
+                
+                self.notificationsAllowed = granted
             }
         }
     }
@@ -80,7 +92,31 @@ class WorkoutConstructor {
                     print("Failed to add steps with error \(String(describing: error))")
                     return
                 }
+                
+                if self.notificationsAllowed {
+                    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)
+                    
+                    let content = UNMutableNotificationContent()
+                    content.title = "LifeSpan Workout Synced"
+                    content.body = "\(stepCount) steps, \(distanceInMiles) miles, \(calorieCount) calories burned"
+                    let notification = UNNotificationRequest(identifier: "StepRequest", content: content, trigger: trigger)
+                    
+                    let nc = UNUserNotificationCenter.current()
+                    nc.delegate = self
+                    
+                    nc.add(notification) { error in
+                        if let err = error {
+                            print("Error sending notification: \(err)")
+                        }
+                    }
+                }
             }
         }
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter,
+                                willPresent notification: UNNotification,
+                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner])
     }
 }
