@@ -11,6 +11,7 @@ import CoreBluetooth
 class BluetoothWorkoutReceiver: NSObject {
     private var centralManager: CBCentralManager!
     private var peripheral: CBPeripheral?
+    private let workoutConstructor = WorkoutConstructor()
     
     func setUp() {
         centralManager = CBCentralManager(delegate: self, queue: nil)
@@ -140,11 +141,38 @@ extension BluetoothWorkoutReceiver: CBCentralManagerDelegate, CBPeripheralDelega
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         self.peripheral = peripheral
+        peripheral.delegate = self
         centralManager.connect(peripheral)
     }
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
+        peripheral.discoverServices([PhoneSyncService.serviceUUID])
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        if let services = peripheral.services, let service = services.first(where: { $0.uuid == PhoneSyncService.serviceUUID }) {
+            peripheral.discoverCharacteristics([PhoneSyncService.characteristicUUID], for: service)
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        if let characteristics = service.characteristics, let ch = characteristics.first(where: { $0.uuid == PhoneSyncService.characteristicUUID }) {
+            peripheral.setNotifyValue(true, for: ch)
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        guard let value = characteristic.value else {
+            print("unable to fetch data")
+            return
+        }
+        guard let dict = try? JSONSerialization.jsonObject(with: value) as? [String: Any] else {
+            print("unable to decode JSON")
+            return
+        }
+        print(dict)
+        workoutConstructor.handle(dictionary: dict)
     }
     
     func sessionFinished(peripheral: CBPeripheral, dict: [String: Any]) {

@@ -40,7 +40,15 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
             return
         }
         
-        
+        if !values.isEmpty {
+//        while !values.isEmpty {
+            let nextValue = values.first!
+            let jsonData = try! JSONSerialization.data(withJSONObject: nextValue)
+            peripheralManager.updateValue(jsonData, for: transferCharacteristic, onSubscribedCentrals: nil)
+            
+            // TODO: Verify that the data was actually sent!
+//            values.removeFirst()
+        }
     }
     
     func peripheralManagerDidUpdateState(_ peripheral: CBPeripheralManager) {

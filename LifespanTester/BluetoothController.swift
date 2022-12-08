@@ -80,7 +80,7 @@ class BluetoothController: NSObject {
         }
         
         func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-            responseDict["timestamp"] = Date.now
+            responseDict["timestamp"] = PhoneSyncService.dateFormatter.string(from: Date.now)
             if let services = peripheral.services {
                 for service in services {
                     peripheral.discoverCharacteristics(nil, for: service)
