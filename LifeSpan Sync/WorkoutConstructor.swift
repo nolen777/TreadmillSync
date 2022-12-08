@@ -7,14 +7,11 @@
 
 import Foundation
 import HealthKit
-import UserNotifications
 
-class WorkoutConstructor: NSObject, UNUserNotificationCenterDelegate {
+class WorkoutConstructor {
     let store = HKHealthStore()
-    var notificationsAllowed = false
     
-    override init() {
-        super.init()
+    init() {
         DispatchQueue.main.async {
             let workoutStatus = self.store.authorizationStatus(for: HKWorkoutType.workoutType())
             let stepStatus = self.store.authorizationStatus(for: HKObjectType.quantityType(forIdentifier: .stepCount)!)
@@ -24,15 +21,6 @@ class WorkoutConstructor: NSObject, UNUserNotificationCenterDelegate {
                         fatalError("Failed to authorize HealthKit access with error \(String(describing: error))")
                     }
                 }
-            }
-            
-            let center = UNUserNotificationCenter.current()
-            center.requestAuthorization(options: [.alert]) { granted, error in
-                if let error = error {
-                    print("Error requesting notification authorization \(error)")
-                }
-                
-                self.notificationsAllowed = granted
             }
         }
     }
@@ -60,13 +48,13 @@ class WorkoutConstructor: NSObject, UNUserNotificationCenterDelegate {
             print("Unable to parse distance")
             return
         }
-        guard let calorieCount = dictionary["calories"] as? Double else {
+        guard let calorieCount = dictionary["calories"] as? Int64 else {
             print("Unable to parse calories")
             return
         }
         let startDate = endDate.addingTimeInterval(-seconds)
         let distance = HKQuantity(unit: HKUnit.mile(), doubleValue: distanceInMiles)
-        let energyBurned = HKQuantity(unit: HKUnit.largeCalorie(), doubleValue: calorieCount)
+        let energyBurned = HKQuantity(unit: HKUnit.largeCalorie(), doubleValue: Double(calorieCount))
         let indoorWalk = HKWorkout(activityType: HKWorkoutActivityType.walking,
                                    start: startDate,
                                    end: endDate,
@@ -93,30 +81,8 @@ class WorkoutConstructor: NSObject, UNUserNotificationCenterDelegate {
                     return
                 }
                 
-                if self.notificationsAllowed {
-                    let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)
-                    
-                    let content = UNMutableNotificationContent()
-                    content.title = "LifeSpan Workout Synced"
-                    content.body = "\(stepCount) steps, \(distanceInMiles) miles, \(calorieCount) calories burned"
-                    let notification = UNNotificationRequest(identifier: "StepRequest", content: content, trigger: trigger)
-                    
-                    let nc = UNUserNotificationCenter.current()
-                    nc.delegate = self
-                    
-                    nc.add(notification) { error in
-                        if let err = error {
-                            print("Error sending notification: \(err)")
-                        }
-                    }
-                }
+                NotificationHandler.handler.displayNote(stepCount: stepCount, distanceInMiles: distanceInMiles, calorieCount: calorieCount)
             }
         }
-    }
-    
-    func userNotificationCenter(_ center: UNUserNotificationCenter,
-                                willPresent notification: UNNotification,
-                                withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
-        completionHandler([.banner])
     }
 }
