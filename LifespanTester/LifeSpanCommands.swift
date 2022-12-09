@@ -32,28 +32,28 @@ struct LifeSpanCommands {
     }
     
     static let queryCommands: [LifeSpanCommand] = [
-        LifeSpanCommand(description: "unknown91", commandHexString: "a191000000", responseProcessor: LifeSpanDataConversions.toData)!,
-        LifeSpanCommand(description: "unknown81", commandHexString: "a181000000", responseProcessor: LifeSpanDataConversions.toData)!,
-        LifeSpanCommand(description: "unknown61", commandHexString: "a161000000", responseProcessor: LifeSpanDataConversions.toData)!,
-        LifeSpanCommand(description: "unknown62", commandHexString: "a162000000", responseProcessor: LifeSpanDataConversions.toData)!,
+        LifeSpanCommand(description: "unknown91", commandHexString: "a191000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
+        LifeSpanCommand(description: "unknown81", commandHexString: "a181000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
+        LifeSpanCommand(description: "unknown61", commandHexString: "a161000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
+        LifeSpanCommand(description: "unknown62", commandHexString: "a162000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
         LifeSpanCommand(description: "speedInMph", commandHexString: "a182000000", responseProcessor: LifeSpanDataConversions.toDecimal)!,
         LifeSpanCommand(description: "distanceInMiles", commandHexString: "a185000000", responseProcessor: LifeSpanDataConversions.toDecimal)!,
         LifeSpanCommand(description: "calories", commandHexString: "a187000000", responseProcessor: LifeSpanDataConversions.toUInt16)!,
         LifeSpanCommand(description: "steps", commandHexString: "a188000000", responseProcessor: LifeSpanDataConversions.toUInt16)!,
         LifeSpanCommand(description: "timeInSeconds", commandHexString: "a189000000", responseProcessor: LifeSpanDataConversions.toSeconds)!,
-        LifeSpanCommand(description: "unknown8B", commandHexString: "a18b000000", responseProcessor: LifeSpanDataConversions.toData)!,
-        LifeSpanCommand(description: "unknown86", commandHexString: "a186000000", responseProcessor: LifeSpanDataConversions.toData)!,
-        LifeSpanCommand(description: "unknown63", commandHexString: "a163000000", responseProcessor: LifeSpanDataConversions.toData)!,
-        LifeSpanCommand(description: "unknown64", commandHexString: "a164000000", responseProcessor: LifeSpanDataConversions.toData)!,
+        LifeSpanCommand(description: "unknown8B", commandHexString: "a18b000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
+        LifeSpanCommand(description: "unknown86", commandHexString: "a186000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
+        LifeSpanCommand(description: "unknown63", commandHexString: "a163000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
+        LifeSpanCommand(description: "unknown64", commandHexString: "a164000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
     ]
     
-    static let resetCommand = LifeSpanCommand(description: "reset", commandHexString: "e200000000", responseProcessor: LifeSpanDataConversions.toData)!
+    static let resetCommand = LifeSpanCommand(description: "reset", commandHexString: "e200000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!
     
     // Currently unused
-    static let startCommand = LifeSpanCommand(description: "startTreadmill", commandHexString: "e100000000", responseProcessor: LifeSpanDataConversions.toData)!
+    static let startCommand = LifeSpanCommand(description: "startTreadmill", commandHexString: "e100000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!
     
     // Currently unused
-    static let stopCommand = LifeSpanCommand(description: "stopTreadmill", commandHexString: "e000000000", responseProcessor: LifeSpanDataConversions.toData)!
+    static let stopCommand = LifeSpanCommand(description: "stopTreadmill", commandHexString: "e000000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!
     
     // Currently unused
     static func speedCommand(speed: Float) throws -> LifeSpanCommand {
@@ -65,6 +65,6 @@ struct LifeSpanCommands {
         let fractionByte = UInt8(speedHundredths & 0xFF)
         
         let data = Data(bytes: [0xd0, unitsByte, fractionByte, 0x00, 0x00], count: 5)
-        return LifeSpanCommand(description: "adjustSpeed", commandData: data, responseProcessor: LifeSpanDataConversions.toData)
+        return LifeSpanCommand(description: "adjustSpeed", commandData: data, responseProcessor: LifeSpanDataConversions.toHexEncodedString)
     }
 }
