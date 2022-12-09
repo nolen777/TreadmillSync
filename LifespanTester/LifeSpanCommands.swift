@@ -32,15 +32,18 @@ struct LifeSpanCommands {
     }
     
     static let queryCommands: [LifeSpanCommand] = [
-        LifeSpanCommand(description: "unknown91", commandHexString: "a191000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
-        LifeSpanCommand(description: "unknown81", commandHexString: "a181000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
-        LifeSpanCommand(description: "unknown61", commandHexString: "a161000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
-        LifeSpanCommand(description: "unknown62", commandHexString: "a162000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
         LifeSpanCommand(description: "speedInMph", commandHexString: "a182000000", responseProcessor: LifeSpanDataConversions.toDecimal)!,
         LifeSpanCommand(description: "distanceInMiles", commandHexString: "a185000000", responseProcessor: LifeSpanDataConversions.toDecimal)!,
         LifeSpanCommand(description: "calories", commandHexString: "a187000000", responseProcessor: LifeSpanDataConversions.toUInt16)!,
         LifeSpanCommand(description: "steps", commandHexString: "a188000000", responseProcessor: LifeSpanDataConversions.toUInt16)!,
         LifeSpanCommand(description: "timeInSeconds", commandHexString: "a189000000", responseProcessor: LifeSpanDataConversions.toSeconds)!,
+    ]
+    
+    static let unknownCommands: [LifeSpanCommand] = [
+        LifeSpanCommand(description: "unknown91", commandHexString: "a191000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
+        LifeSpanCommand(description: "unknown81", commandHexString: "a181000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
+        LifeSpanCommand(description: "unknown61", commandHexString: "a161000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
+        LifeSpanCommand(description: "unknown62", commandHexString: "a162000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
         LifeSpanCommand(description: "unknown8B", commandHexString: "a18b000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
         LifeSpanCommand(description: "unknown86", commandHexString: "a186000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
         LifeSpanCommand(description: "unknown63", commandHexString: "a163000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
