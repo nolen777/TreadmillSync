@@ -20,11 +20,13 @@ class BluetoothController: NSObject {
                 return
             }
             if listening {
-                if !centralManager.isScanning {
+                if centralManager.state == .poweredOn && !centralManager.isScanning {
+                    print("Starting scan")
                     centralManager.scanForPeripherals(withServices: nil)
                 }
             } else {
                 if centralManager.isScanning {
+                    print("Stopping scan")
                     centralManager.stopScan()
                 }
             }
