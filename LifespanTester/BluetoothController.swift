@@ -75,6 +75,7 @@ class BluetoothController: NSObject {
             } else {
                 print("complete dictionary:")
                 print("\(responseDict)")
+                peripheral.writeValue(LifeSpanCommands.resetCommand.commandData, for: characteristic1!, type: CBCharacteristicWriteType.withResponse)
                 finishedCallback(peripheral, responseDict)
             }
         }

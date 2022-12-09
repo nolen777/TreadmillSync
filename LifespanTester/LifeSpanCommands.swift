@@ -43,5 +43,5 @@ struct LifeSpanCommands {
         LifeSpanCommand(description: "unknown64", commandHexString: "a164000000", responseProcessor: LifeSpanDataConversions.toData)!,
     ]
     
-    let resetCommand = LifeSpanCommand(description: "reset", commandHexString: "e200000000", responseProcessor: LifeSpanDataConversions.toData)!
+    static let resetCommand = LifeSpanCommand(description: "reset", commandHexString: "e200000000", responseProcessor: LifeSpanDataConversions.toData)!
 }
