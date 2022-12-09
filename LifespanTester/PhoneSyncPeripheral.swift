@@ -15,7 +15,34 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
     
     var connectedCentral: CBCentral?
     
-    var values = [[String : Any]]()
+    let valuesToSendQueue = DispatchQueue(label: "phone_sync_values_queue")
+    
+    private var valuesToSend = [[String : Any]]()
+    
+    func send(newValue: [String: Any]) {
+        valuesToSendQueue.async {
+            self.valuesToSend.append(newValue)
+            
+            DispatchQueue.main.async {
+                if self.peripheralManager.state == .poweredOn {
+                    self.startAdvertising()
+                }
+            }
+        }
+    }
+    
+    private func startAdvertising() {
+        if let peripheral = peripheralManager {
+            print("Starting to advertise")
+            
+            peripheral.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [transferService.uuid]])
+        }
+    }
+    
+    private func stopAdvertising() {
+        print("Stopping advertisement")
+        peripheralManager.stopAdvertising()
+    }
     
     private func setUpPeripheral() {
         let transferCharacteristic = CBMutableCharacteristic(type: PhoneSyncService.characteristicUUID,
@@ -40,14 +67,19 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
             return
         }
         
-        if !values.isEmpty {
-//        while !values.isEmpty {
-            let nextValue = values.first!
-            let jsonData = try! JSONSerialization.data(withJSONObject: nextValue)
-            peripheralManager.updateValue(jsonData, for: transferCharacteristic, onSubscribedCentrals: nil)
+        valuesToSendQueue.async {
+            while let nextValue = self.valuesToSend.first {
+                let jsonData = try! JSONSerialization.data(withJSONObject: nextValue)
+                
+                if self.peripheralManager.updateValue(jsonData, for: transferCharacteristic, onSubscribedCentrals: nil) {
+                    print("successfully sent data")
+                    self.valuesToSend.removeFirst()
+                }
+            }
+            // Send EOM when we have no values remaining
+            self.peripheralManager.updateValue("EOM".data(using: .utf8)!, for: transferCharacteristic, onSubscribedCentrals: nil)
             
-            // TODO: Verify that the data was actually sent!
-//            values.removeFirst()
+            self.stopAdvertising()
         }
     }
     
@@ -82,8 +114,9 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
-        print("Starting to advertise with error \(String(describing: error))")
-        peripheral.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [service.uuid]])
+        if !valuesToSend.isEmpty {
+            startAdvertising()
+        }
     }
     
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {

@@ -164,7 +164,7 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func sessionFinished(peripheral: CBPeripheral, dict: [String: Any]) {
-        virtualPeripheral.values.append(dict)
+        virtualPeripheral.send(newValue: dict)
         centralManager.cancelPeripheralConnection(peripheral)
         centralManager.stopScan()
         
