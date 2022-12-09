@@ -106,7 +106,7 @@ class BluetoothController: NSObject {
                         peripheral.setNotifyValue(true, for: ch)
                     } else if ch.uuid.uuidString == "FFF2" {
                         characteristic2 = ch
-                        startCommands()
+                        peripheral.writeValue(Data(hexString: "0200000000")!, for: ch, type: CBCharacteristicWriteType.withResponse)
                     }
                 }
             }
@@ -117,8 +117,11 @@ class BluetoothController: NSObject {
                 print("unable to fetch data")
                 return
             }
-
-            if currentCommandIndex >= LifeSpanCommands.queryCommands.count { //value == Data(hexString: "e2aa00000000") {
+            if value == Data(hexString: "02aa11180000")! {
+                peripheral.writeValue(Data(hexString: "c000000000")!, for: characteristic2, type: CBCharacteristicWriteType.withResponse)
+            } else if value == Data(hexString: "c0ff00000000") {
+                startCommands()
+            } else if value == Data(hexString: "e2aa00000000") {
                 // response to the reset command
                 finishedCallback(peripheral, responseDict)
                 responseDict.removeAll()
