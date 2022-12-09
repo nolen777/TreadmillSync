@@ -13,14 +13,6 @@ class BluetoothController: NSObject {
     private var peripheralManager: CBPeripheralManager!
     private let virtualPeripheral = PhoneSyncPeripheral()
     
-    let service0CBUUID: CBUUID = CBUUID(string: "180A")
-    let serviceCBUUID: CBUUID = CBUUID(data: Data(bytes:[255, 240], count: 2))
-    let service2CBUUID: CBUUID = CBUUID(string: "49535343-5D82-6099-9348-7AAC4D5FBC51")
-    let service3CBUUID: CBUUID = CBUUID(string: "49535343-026E-3A9B-954C-97DAEF17E26E")
-    let service4CBUUID: CBUUID = CBUUID(string: "93D7427A-DA79-EC65-48AD-201EBE53A848")
-    
-    var lifespanUUID: UUID?
-    var currentName: String?
     var session: LifeSpanSession?
     
     func setUp() {
@@ -29,32 +21,18 @@ class BluetoothController: NSObject {
     }
     
     class LifeSpanSession: NSObject, CBPeripheralDelegate {
-        enum LifeSpanSessionError: Error {
-            case invalidSpeed
-        }
-        
-        let startCommand: [UInt8] = [0xE1, 0x00, 0x00, 0x00, 0x00]
-        let stopCommand: [UInt8] = [0xE0, 0x00, 0x00, 0x00, 0x00]
-        func speedCommand(speed: Float) throws -> [UInt8] {
-            guard (speed > 4.0 || speed < 0.4) else {
-                throw LifeSpanSessionError.invalidSpeed
-            }
-            let speedHundredths = UInt16(speed * 100.0)
-            let unitsByte = UInt8(speedHundredths >> 8)
-            let fractionByte = UInt8(speedHundredths & 0xFF)
-            return [0xd0, unitsByte, fractionByte, 0x00, 0x00]
-        }
-        
         var currentCommandIndex: Int = 0
         var responseDict = [String : Any]()
         let finishedCallback: (CBPeripheral, [String: Any]) -> Void
+        let abortedCallback: (CBPeripheral) -> Void
         let peripheral: CBPeripheral
         var characteristic1: CBCharacteristic!
         var characteristic2: CBCharacteristic!
         
-        init(peripheral: CBPeripheral, callback: @escaping (CBPeripheral, [String: Any]) -> Void) {
+        init(peripheral: CBPeripheral, finishedCallback: @escaping (CBPeripheral, [String: Any]) -> Void, abortedCallback: @escaping (CBPeripheral) -> Void) {
             self.peripheral = peripheral
-            self.finishedCallback = callback
+            self.finishedCallback = finishedCallback
+            self.abortedCallback = abortedCallback
             super.init()
             peripheral.delegate = self
         }
@@ -118,6 +96,21 @@ class BluetoothController: NSObject {
                 let command = LifeSpanCommands.queryCommands[currentCommandIndex]
                 let key = command.description
                 let response = command.responseProcessor(value)
+                
+                // HACK: the reset doesn't happen correctly if the treadmill is running, so we don't have
+                // a reliable way to avoid deduplicating data. So if we see the speed is >0, abort, which won't sync
+                // to the phone. Alternatively, we could maintain previous state and subtract steps/distance we
+                // already know about.
+                if key == "speedInMph" {
+                    if let speedInMph = response as? Decimal {
+                        if speedInMph > 0 {
+                            print("treadmill is running, not syncing")
+                            abortedCallback(peripheral)
+                            return
+                        }
+                    }
+                }
+                
                 responseDict[key] = response
                 currentCommandIndex = currentCommandIndex + 1
                 sendNextCommand()
@@ -155,8 +148,7 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         if peripheral.name == "LifeSpan" {
-            lifespanUUID = peripheral.identifier
-            session = LifeSpanSession(peripheral: peripheral, callback: sessionFinished)
+            session = LifeSpanSession(peripheral: peripheral, finishedCallback: sessionFinished, abortedCallback: sessionAborted)
             centralManager.connect(peripheral)
         }
     }
@@ -164,6 +156,17 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         print("Connected!")
         session?.run()
+    }
+    
+    func sessionAborted(peripheral: CBPeripheral) {
+        centralManager.cancelPeripheralConnection(peripheral)
+        centralManager.stopScan()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 15, execute: {
+            self.centralManager.scanForPeripherals(withServices: nil)
+        })
+        
+        session = nil
     }
     
     func sessionFinished(peripheral: CBPeripheral, dict: [String: Any]) {
