@@ -32,7 +32,7 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
     }
     
     private func startAdvertising() {
-        if let peripheral = peripheralManager, peripheral.state == .poweredOn, broadcasting {
+        if let peripheral = peripheralManager, peripheral.state == .poweredOn, broadcasting, !peripheral.isAdvertising {
             print("Starting to advertise")
             
             peripheral.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [transferService.uuid]])
