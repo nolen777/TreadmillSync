@@ -76,7 +76,6 @@ class BluetoothController: NSObject {
                 print("complete dictionary:")
                 print("\(responseDict)")
                 peripheral.writeValue(LifeSpanCommands.resetCommand.commandData, for: characteristic1!, type: CBCharacteristicWriteType.withResponse)
-                finishedCallback(peripheral, responseDict)
             }
         }
         
@@ -112,6 +111,9 @@ class BluetoothController: NSObject {
                 peripheral.writeValue(Data(hexString: "c000000000")!, for: characteristic2, type: CBCharacteristicWriteType.withResponse)
             } else if value == Data(hexString: "c0ff00000000") {
                 startCommands()
+            } else if value == Data(hexString: "e2aa00000000") {
+                // response to the reset command
+                finishedCallback(peripheral, responseDict)
             } else {
                 let command = LifeSpanCommands.queryCommands[currentCommandIndex]
                 let key = command.description
