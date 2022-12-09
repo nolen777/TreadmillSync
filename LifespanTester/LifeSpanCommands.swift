@@ -47,6 +47,9 @@ struct LifeSpanCommands {
         LifeSpanCommand(description: "unknown64", commandHexString: "a164000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
     ]
     
+    static let unknownCommands: [LifeSpanCommand] = [
+    ]
+    
     static let resetCommand = LifeSpanCommand(description: "reset", commandHexString: "e200000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!
     
     // Currently unused
