@@ -41,7 +41,6 @@ extension BluetoothWorkoutReceiver: CBCentralManagerDelegate, CBPeripheralDelega
             
         @unknown default:
             print("")
-            
         }
     }
     

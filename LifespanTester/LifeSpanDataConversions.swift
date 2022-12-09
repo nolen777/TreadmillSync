@@ -28,7 +28,7 @@ struct LifeSpanDataConversions {
         return 3600 * hours + 60 * minutes + seconds
     }
     
-    static func toData(_ responseData: Data) -> String {
+    static func toHexEncodedString(_ responseData: Data) -> String {
         return responseData.hexEncodedString()
     }
 }

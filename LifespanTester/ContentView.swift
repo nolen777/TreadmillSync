@@ -14,12 +14,15 @@ struct ContentView: View {
     
     var body: some View {
         VStack {
-            Toggle("Listen for Treadmill", isOn: $listenForBluetooth).onChange(of: listenForBluetooth) { newValue in
+            Toggle("Listen for Treadmill",
+                   isOn: $listenForBluetooth)
+            .onChange(of: listenForBluetooth) { newValue in
                 btc.listening = newValue
             }
-            Toggle("Broadcast Workouts", isOn: $broadcastWorkouts).onChange(of: broadcastWorkouts) { newValue in
+            Toggle("Broadcast Workouts",
+                   isOn: $broadcastWorkouts)
+            .onChange(of: broadcastWorkouts) { newValue in
                 btc.virtualPeripheral.broadcasting = newValue
-                print("toggled")
             }
         }
         .padding().onAppear {
