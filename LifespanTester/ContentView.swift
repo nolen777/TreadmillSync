@@ -9,22 +9,29 @@ import SwiftUI
 
 struct ContentView: View {
     let btc = BluetoothController()
+    @State var listenForBluetooth: Bool
+    @State var broadcastWorkouts: Bool
     
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+            Toggle("Listen for Treadmill", isOn: $listenForBluetooth).onChange(of: listenForBluetooth) { newValue in
+                btc.listening = newValue
+            }
+            Toggle("Broadcast Workouts", isOn: $broadcastWorkouts).onChange(of: broadcastWorkouts) { newValue in
+                btc.virtualPeripheral.broadcasting = newValue
+                print("toggled")
+            }
         }
         .padding().onAppear {
             btc.setUp()
+            btc.virtualPeripheral.broadcasting = broadcastWorkouts
+            btc.listening = listenForBluetooth
         }
     }
 }
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView()
+        ContentView(listenForBluetooth: true, broadcastWorkouts: true)
     }
 }

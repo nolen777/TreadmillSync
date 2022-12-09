@@ -11,9 +11,25 @@ import CoreBluetooth
 class BluetoothController: NSObject {
     private var centralManager: CBCentralManager!
     private var peripheralManager: CBPeripheralManager!
-    private let virtualPeripheral = PhoneSyncPeripheral()
+    let virtualPeripheral = PhoneSyncPeripheral()
     
     var session: LifeSpanSession?
+    var listening: Bool = false {
+        didSet {
+            guard listening != oldValue else {
+                return
+            }
+            if listening {
+                if !centralManager.isScanning {
+                    centralManager.scanForPeripherals(withServices: nil)
+                }
+            } else {
+                if centralManager.isScanning {
+                    centralManager.stopScan()
+                }
+            }
+        }
+    }
     
     func setUp() {
         centralManager = CBCentralManager(delegate: self, queue: nil)
@@ -102,12 +118,10 @@ class BluetoothController: NSObject {
                 // to the phone. Alternatively, we could maintain previous state and subtract steps/distance we
                 // already know about.
                 if key == "speedInMph" {
-                    if let speedInMph = response as? Decimal {
-                        if speedInMph > 0 {
-                            print("treadmill is running, not syncing")
-                            abortedCallback(peripheral)
-                            return
-                        }
+                    if let speedInMph = response as? Decimal, speedInMph > 0 {
+                        print("treadmill is running, not syncing")
+                        abortedCallback(peripheral)
+                        return
                     }
                 }
                 
@@ -123,8 +137,9 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
-            centralManager.scanForPeripherals(withServices: nil)
-            
+            if listening {
+                centralManager.scanForPeripherals(withServices: nil)
+            }
         case .unknown:
             print("")
             
@@ -163,7 +178,9 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
         centralManager.stopScan()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 15, execute: {
-            self.centralManager.scanForPeripherals(withServices: nil)
+            if self.listening {
+                self.centralManager.scanForPeripherals(withServices: nil)
+            }
         })
         
         session = nil
@@ -175,7 +192,9 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
         centralManager.stopScan()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 15, execute: {
-            self.centralManager.scanForPeripherals(withServices: nil)
+            if self.listening {
+                self.centralManager.scanForPeripherals(withServices: nil)
+            }
         })
         
         session = nil

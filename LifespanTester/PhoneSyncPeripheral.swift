@@ -15,6 +15,8 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
     
     var connectedCentral: CBCentral?
     
+    var broadcasting: Bool = false
+    
     let valuesToSendQueue = DispatchQueue(label: "phone_sync_values_queue")
     
     private var valuesToSend = [[String : Any]]()
@@ -24,15 +26,13 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
             self.valuesToSend.append(newValue)
             
             DispatchQueue.main.async {
-                if self.peripheralManager.state == .poweredOn {
-                    self.startAdvertising()
-                }
+                self.startAdvertising()
             }
         }
     }
     
     private func startAdvertising() {
-        if let peripheral = peripheralManager {
+        if let peripheral = peripheralManager, peripheral.state == .poweredOn, broadcasting {
             print("Starting to advertise")
             
             peripheral.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [transferService.uuid]])
