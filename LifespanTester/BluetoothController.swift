@@ -69,7 +69,8 @@ class BluetoothController: NSObject {
         
         func startCommands() -> Void {
             currentCommandIndex = 0
-            sendNextCommand()
+            peripheral.readValue(for: characteristic1)
+        //    sendNextCommand()
         }
         
         func run() -> Void {
@@ -79,6 +80,7 @@ class BluetoothController: NSObject {
         func sendNextCommand() {
             if currentCommandIndex < LifeSpanCommands.queryCommands.count {
                 let command = LifeSpanCommands.queryCommands[currentCommandIndex]
+                print("Sending command \(command.description)")
                 peripheral.writeValue(command.commandData, for: characteristic1!, type: CBCharacteristicWriteType.withResponse)
             } else {
                 print("complete dictionary:")
@@ -120,10 +122,12 @@ class BluetoothController: NSObject {
                 // response to the reset command
                 finishedCallback(peripheral, responseDict)
                 responseDict.removeAll()
+                currentCommandIndex = 0
             } else {
                 let command = LifeSpanCommands.queryCommands[currentCommandIndex]
                 let key = command.description
                 let response = command.responseProcessor(value)
+                print("\(key) \(response) \(value.hexEncodedString())")
                 
                 // HACK: the reset doesn't happen correctly if the treadmill is running, so we don't have
                 // a reliable way to avoid deduplicating data. So if we see the speed is >0, abort, which won't sync
