@@ -248,7 +248,7 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     func stopListeningFor(_ delay: TimeInterval) {
         listening = false
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 15, execute: {
+        DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .seconds(15)), execute: {
             self.listening = true
         })
     }
