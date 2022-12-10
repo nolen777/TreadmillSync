@@ -33,7 +33,7 @@ class QueryCommand: LifeSpanCommand {
     }
 }
 
-class InitializationCommand: LifeSpanCommand {
+class ImperativeCommand: LifeSpanCommand {
     let expectedResponse: Data
     
     init(description: String, commandData: Data, expectedResponse: Data) {
@@ -54,9 +54,9 @@ struct LifeSpanCommands {
         case invalidSpeed
     }
     
-    static let initializationCommands: [InitializationCommand] = [
-        InitializationCommand(description: "firstInitialization", commandHexString: "0200000000", expectedResponseHexString: "02aa11180000")!,
-        InitializationCommand(description: "secondInitialization", commandHexString: "c000000000", expectedResponseHexString: "c0ff00000000")!,
+    static let initializationCommands: [ImperativeCommand] = [
+        ImperativeCommand(description: "firstInitialization", commandHexString: "0200000000", expectedResponseHexString: "02aa11180000")!,
+        ImperativeCommand(description: "secondInitialization", commandHexString: "c000000000", expectedResponseHexString: "c0ff00000000")!,
     ]
     
     static let queryCommands: [QueryCommand] = [
@@ -78,16 +78,16 @@ struct LifeSpanCommands {
         QueryCommand(description: "unknown64", commandHexString: "a164000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
     ]
     
-    static let resetCommand = InitializationCommand(description: "reset", commandHexString: "e200000000", expectedResponseHexString: "e2aa00000000")!
+    static let resetCommand = ImperativeCommand(description: "reset", commandHexString: "e200000000", expectedResponseHexString: "e2aa00000000")!
     
     // Currently unused
-    static let startCommand = QueryCommand(description: "startTreadmill", commandHexString: "e100000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!
+    static let startCommand = ImperativeCommand(description: "startTreadmill", commandHexString: "e100000000", expectedResponseHexString: "")!
     
     // Currently unused
-    static let stopCommand = QueryCommand(description: "stopTreadmill", commandHexString: "e000000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!
+    static let stopCommand = ImperativeCommand(description: "stopTreadmill", commandHexString: "e000000000", expectedResponseHexString: "")!
     
     // Currently unused
-    static func speedCommand(speed: Float) throws -> LifeSpanCommand {
+    static func speedCommand(speed: Float) throws -> ImperativeCommand {
         guard (speed > 4.0 || speed < 0.4) else {
             throw LifeSpanCommandError.invalidSpeed
         }
@@ -96,6 +96,6 @@ struct LifeSpanCommands {
         let fractionByte = UInt8(speedHundredths & 0xFF)
         
         let data = Data(bytes: [0xd0, unitsByte, fractionByte, 0x00, 0x00], count: 5)
-        return QueryCommand(description: "adjustSpeed", commandData: data, responseProcessor: LifeSpanDataConversions.toHexEncodedString)
+        return ImperativeCommand(description: "adjustSpeed", commandData: data, expectedResponse: Data())
     }
 }
