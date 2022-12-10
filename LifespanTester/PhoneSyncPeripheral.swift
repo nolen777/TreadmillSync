@@ -9,15 +9,15 @@ import Foundation
 import CoreBluetooth
 
 class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
-    var transferService: CBMutableService!
-    var transferCharacteristic: CBMutableCharacteristic!
-    var peripheralManager: CBPeripheralManager!
+    private var transferService: CBMutableService!
+    private var transferCharacteristic: CBMutableCharacteristic!
+    private var peripheralManager: CBPeripheralManager!
     
-    var connectedCentral: CBCentral?
+    private var connectedCentral: CBCentral?
     
     var broadcasting: Bool = false
     
-    let valuesToSendQueue = DispatchQueue(label: "phone_sync_values_queue")
+    private let valuesToSendQueue = DispatchQueue(label: "phone_sync_values_queue")
     
     private var valuesToSend = [[String : Any]]()
     
@@ -31,7 +31,7 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
         }
     }
     
-    private func startAdvertising() {
+    func startAdvertising() {
         if let peripheral = peripheralManager, peripheral.state == .poweredOn, broadcasting, !peripheral.isAdvertising {
             print("Starting to advertise")
             
@@ -39,7 +39,7 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
         }
     }
     
-    private func stopAdvertising() {
+    func stopAdvertising() {
         if let peripheral = peripheralManager, peripheral.isAdvertising {
             print("Stopping advertisement")
             peripheralManager.stopAdvertising()
