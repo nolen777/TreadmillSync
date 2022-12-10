@@ -51,13 +51,21 @@ class BluetoothController: NSObject {
     }
     
     class LifeSpanSession: NSObject, CBPeripheralDelegate {
-        var currentCommandIndex: Int = 0
         var responseDict = [String : Any]()
         let finishedCallback: (CBPeripheral, [String: Any]) -> Void
         let abortedCallback: (CBPeripheral) -> Void
         let peripheral: CBPeripheral
         var characteristic1: CBCharacteristic!
         var characteristic2: CBCharacteristic!
+        
+        enum State {
+            case idle
+            case initializing(index: Int) // currently unused, these commands don't seem to be necessary
+            case querying(index: Int)
+            case resetting
+        }
+        
+        var state: State = .idle
         
         init(peripheral: CBPeripheral, finishedCallback: @escaping (CBPeripheral, [String: Any]) -> Void, abortedCallback: @escaping (CBPeripheral) -> Void) {
             self.peripheral = peripheral
@@ -68,7 +76,7 @@ class BluetoothController: NSObject {
         }
         
         func startCommands() -> Void {
-            currentCommandIndex = 0
+            state = .querying(index: 0)
             sendNextCommand()
         }
         
@@ -77,13 +85,29 @@ class BluetoothController: NSObject {
         }
         
         func sendNextCommand() {
-            if currentCommandIndex < LifeSpanCommands.queryCommands.count {
-                let command = LifeSpanCommands.queryCommands[currentCommandIndex]
-                peripheral.writeValue(command.commandData, for: characteristic1!, type: CBCharacteristicWriteType.withResponse)
-            } else {
+            switch (state) {
+            case .idle:
+                print("Idle, this shouldn't happen")
+                break
+                
+            case .initializing(let commandIndex):
+                let initializationCommand = LifeSpanCommands.initializationCommands[commandIndex]
+                print("Sending command \(initializationCommand.description)")
+                peripheral.writeValue(initializationCommand.commandData, for: characteristic1!, type: CBCharacteristicWriteType.withResponse)
+                break
+                
+            case .querying(let commandIndex):
+                let queryCommand = LifeSpanCommands.queryCommands[commandIndex]
+                print("Sending query \(queryCommand.description)")
+                peripheral.writeValue(queryCommand.commandData, for: characteristic1!, type: CBCharacteristicWriteType.withResponse)
+                break
+                
+            case .resetting:
                 print("complete dictionary:")
                 print("\(responseDict)")
+                print("Sending reset command")
                 peripheral.writeValue(LifeSpanCommands.resetCommand.commandData, for: characteristic1!, type: CBCharacteristicWriteType.withResponse)
+                break
             }
         }
         
@@ -102,9 +126,7 @@ class BluetoothController: NSObject {
                     if ch.uuid.uuidString == "FFF1" {
                         characteristic1 = ch
                         peripheral.setNotifyValue(true, for: ch)
-                    } else if ch.uuid.uuidString == "FFF2" {
-                        characteristic2 = ch
-                        startCommands()
+                        self.startCommands()
                     }
                 }
             }
@@ -115,15 +137,38 @@ class BluetoothController: NSObject {
                 print("unable to fetch data")
                 return
             }
-
-            if currentCommandIndex >= LifeSpanCommands.queryCommands.count { //value == Data(hexString: "e2aa00000000") {
-                // response to the reset command
-                finishedCallback(peripheral, responseDict)
-                responseDict.removeAll()
-            } else {
-                let command = LifeSpanCommands.queryCommands[currentCommandIndex]
+            
+            switch (state) {
+            case .idle:
+                print("\(Date.now.timeIntervalSince1970) We got value \(value.hexEncodedString()) while idle")
+                break
+                
+            case .initializing(let commandIndex):
+                let command = LifeSpanCommands.initializationCommands[commandIndex]
+                guard value == command.expectedResponse else {
+                    print("Got unexpected value \(value.hexEncodedString()) (expecting \(command.expectedResponse.hexEncodedString()))for command \(command.description)")
+                    peripheral.readValue(for: characteristic)
+                    return
+                }
+                print("Received expected initialization response")
+                
+                if commandIndex + 1 < LifeSpanCommands.initializationCommands.count {
+                    state = .initializing(index: commandIndex + 1)
+                } else {
+                    state = .querying(index: 0)
+                }
+                sendNextCommand()
+                break
+                
+            case .querying(let commandIndex):
+                guard value[0] == 0xa1, value[1] == 0xaa else {
+                    print("unexpected value \(value.hexEncodedString()) in query result")
+                    return
+                }
+                let command = LifeSpanCommands.queryCommands[commandIndex]
                 let key = command.description
                 let response = command.responseProcessor(value)
+                print("\(key) \(response) \(value.hexEncodedString())")
                 
                 // HACK: the reset doesn't happen correctly if the treadmill is running, so we don't have
                 // a reliable way to avoid deduplicating data. So if we see the speed is >0, abort, which won't sync
@@ -138,8 +183,24 @@ class BluetoothController: NSObject {
                 }
                 
                 responseDict[key] = response
-                currentCommandIndex = currentCommandIndex + 1
+                if commandIndex + 1 < LifeSpanCommands.queryCommands.count {
+                    state = .querying(index: commandIndex + 1)
+                } else {
+                    state = .resetting
+                }
                 sendNextCommand()
+                break
+                
+            case .resetting:
+                guard value == LifeSpanCommands.resetCommand.expectedResponse else {
+                    print("Got unexpected value \(value.hexEncodedString()) for reset command")
+                    break
+                }
+                print("Received expected reset response")
+                
+                finishedCallback(peripheral, responseDict)
+                responseDict.removeAll()
+                state = .idle
             }
         }
     }
@@ -202,7 +263,7 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func sessionFinished(peripheral: CBPeripheral, dict: [String: Any]) {
         stopListeningFor(15)
-        if let stepCount = dict["stepCount"] as? Int64, stepCount > 0 {
+        if let stepCount = dict["steps"] as? UInt16, stepCount > 0 {
              virtualPeripheral.send(newValue: dict)
          } else {
              print("No steps detected, not sending to phone")
