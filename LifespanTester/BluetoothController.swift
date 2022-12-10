@@ -201,10 +201,13 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     func sessionFinished(peripheral: CBPeripheral, dict: [String: Any]) {
-        virtualPeripheral.send(newValue: dict)
-        centralManager.cancelPeripheralConnection(peripheral)
-        
         stopListeningFor(15)
+        if let stepCount = dict["stepCount"] as? Int64, stepCount > 0 {
+             virtualPeripheral.send(newValue: dict)
+         } else {
+             print("No steps detected, not sending to phone")
+         }
+        centralManager.cancelPeripheralConnection(peripheral)
         
         session = nil
     }
