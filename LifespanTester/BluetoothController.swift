@@ -60,7 +60,7 @@ class BluetoothController: NSObject {
         
         enum State {
             case idle
-            case initializing(index: Int)
+            case initializing(index: Int) // currently unused, these commands don't seem to be necessary
             case querying(index: Int)
             case resetting
         }
@@ -76,7 +76,7 @@ class BluetoothController: NSObject {
         }
         
         func startCommands() -> Void {
-            state = .initializing(index: 0)
+            state = .querying(index: 0)
             sendNextCommand()
         }
         

@@ -54,11 +54,14 @@ struct LifeSpanCommands {
         case invalidSpeed
     }
     
+    // The LifeSpan app sends these commands before the queries below, and their responses look different, but
+    // I'm not sure what they do, so they're currently unused
     static let initializationCommands: [ImperativeCommand] = [
         ImperativeCommand(description: "firstInitialization", commandHexString: "0200000000", expectedResponseHexString: "02aa11180000")!,
         ImperativeCommand(description: "secondInitialization", commandHexString: "c000000000", expectedResponseHexString: "c0ff00000000")!,
     ]
     
+    // These commands cause the treadmill to write back useful data
     static let queryCommands: [QueryCommand] = [
         QueryCommand(description: "speedInMph", commandHexString: "a182000000", responseProcessor: LifeSpanDataConversions.toDecimal)!,
         QueryCommand(description: "distanceInMiles", commandHexString: "a185000000", responseProcessor: LifeSpanDataConversions.toDecimal)!,
@@ -67,6 +70,8 @@ struct LifeSpanCommands {
         QueryCommand(description: "timeInSeconds", commandHexString: "a189000000", responseProcessor: LifeSpanDataConversions.toSeconds)!,
     ]
     
+    // These look like queries, and their response values do sometimes vary, but I don't know what they mean.
+    // So they're currently unused.
     static let unknownCommands: [LifeSpanCommand] = [
         QueryCommand(description: "unknown91", commandHexString: "a191000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
         QueryCommand(description: "unknown81", commandHexString: "a181000000", responseProcessor: LifeSpanDataConversions.toHexEncodedString)!,
