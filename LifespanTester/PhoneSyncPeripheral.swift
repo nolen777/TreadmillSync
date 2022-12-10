@@ -40,8 +40,10 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
     }
     
     private func stopAdvertising() {
-        print("Stopping advertisement")
-        peripheralManager.stopAdvertising()
+        if let peripheral = peripheralManager, peripheral.isAdvertising {
+            print("Stopping advertisement")
+            peripheralManager.stopAdvertising()
+        }
     }
     
     private func setUpPeripheral() {
