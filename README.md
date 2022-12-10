@@ -33,6 +33,8 @@ receives that data and writes it to Apple Health.
   future.
 * There's no pairing/authorization of connecting either Phone <-> Desktop or Desktop <-> treadmill right now, anything
   in Bluetooth range will just connect. We could generate a UUID on the phone and have some kind of "connect" UX.
+* The treadmill tracks active time, but not idle time as far as I can tell. So end date for the workout is just set to
+  the current time when the sync happens, and the start date is the current time - active time duration.
 
 ## Notes
 * LifeSpanCommands.swift also contains some commands for controlling the treadmill: start, stop, adjust speed. Those
