@@ -155,6 +155,7 @@ class BluetoothController: NSObject {
                     peripheral.readValue(for: characteristic)
                     return
                 }
+                print("Received expected initialization response")
                 
                 if commandIndex + 1 < LifeSpanCommands.initializationCommands.count {
                     state = .initializing(index: commandIndex + 1)
@@ -200,6 +201,7 @@ class BluetoothController: NSObject {
                     print("Got unexpected value \(value.hexEncodedString()) for reset command")
                     break
                 }
+                print("Received expected reset response")
                 
                 finishedCallback(peripheral, responseDict)
                 responseDict.removeAll()
