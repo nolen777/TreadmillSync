@@ -237,6 +237,7 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
         if peripheral.name == "LifeSpan" {
             session = LifeSpanSession(peripheral: peripheral, finishedCallback: sessionFinished, abortedCallback: sessionAborted)
             centralManager.connect(peripheral)
+            virtualPeripheral.startAdvertising()
         }
     }
     
@@ -267,6 +268,7 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
              virtualPeripheral.send(newValue: dict)
          } else {
              print("No steps detected, not sending to phone")
+             virtualPeripheral.stopAdvertising()
          }
         centralManager.cancelPeripheralConnection(peripheral)
         
