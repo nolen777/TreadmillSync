@@ -20,16 +20,28 @@ class BluetoothController: NSObject {
                 return
             }
             if listening {
-                if centralManager.state == .poweredOn && !centralManager.isScanning {
-                    print("Starting scan")
-                    centralManager.scanForPeripherals(withServices: nil)
-                }
+                maybeStartScan()
             } else {
-                if centralManager.isScanning {
-                    print("Stopping scan")
-                    centralManager.stopScan()
-                }
+                maybeStopScan()
             }
+        }
+    }
+    
+    var shouldScan: Bool {
+        return centralManager.state == .poweredOn && listening
+    }
+    
+    func maybeStartScan() {
+        if shouldScan && !centralManager.isScanning {
+            print("Starting scan")
+            centralManager.scanForPeripherals(withServices: nil)
+        }
+    }
+    
+    func maybeStopScan() {
+        if !shouldScan && centralManager.isScanning {
+            print("Stopping scan")
+            centralManager.stopScan()
         }
     }
     
@@ -137,27 +149,26 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
-            if listening {
-                centralManager.scanForPeripherals(withServices: nil)
-            }
+            maybeStartScan()
+            
         case .unknown:
-            print("")
+            print("Unknown bluetooth status")
             
         case .resetting:
-            print("")
+            maybeStopScan()
             
         case .unsupported:
-            print("")
+            maybeStopScan()
             
         case .unauthorized:
-            print("")
+            maybeStopScan()
             
         case .poweredOff:
-            print("")
+            maybeStopScan()
             
         @unknown default:
-            print("")
-            
+            print("Unknown bluetooth status")
+
         }
     }
     
@@ -173,15 +184,18 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
         session?.run()
     }
     
-    func sessionAborted(peripheral: CBPeripheral) {
-        centralManager.cancelPeripheralConnection(peripheral)
-        centralManager.stopScan()
+    func stopListeningFor(_ delay: TimeInterval) {
+        listening = false
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 15, execute: {
-            if self.listening {
-                self.centralManager.scanForPeripherals(withServices: nil)
-            }
+            self.listening = true
         })
+    }
+    
+    func sessionAborted(peripheral: CBPeripheral) {
+        centralManager.cancelPeripheralConnection(peripheral)
+        
+        stopListeningFor(15)
         
         session = nil
     }
@@ -189,13 +203,8 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     func sessionFinished(peripheral: CBPeripheral, dict: [String: Any]) {
         virtualPeripheral.send(newValue: dict)
         centralManager.cancelPeripheralConnection(peripheral)
-        centralManager.stopScan()
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 15, execute: {
-            if self.listening {
-                self.centralManager.scanForPeripherals(withServices: nil)
-            }
-        })
+        stopListeningFor(15)
         
         session = nil
     }
