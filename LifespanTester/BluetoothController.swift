@@ -126,12 +126,7 @@ class BluetoothController: NSObject {
                     if ch.uuid.uuidString == "FFF1" {
                         characteristic1 = ch
                         peripheral.setNotifyValue(true, for: ch)
-                    } else if ch.uuid.uuidString == "FFF2" {
-                        characteristic2 = ch
-                        
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2, execute: {
-                            self.startCommands()
-                        })
+                        self.startCommands()
                     }
                 }
             }
@@ -268,7 +263,7 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func sessionFinished(peripheral: CBPeripheral, dict: [String: Any]) {
         stopListeningFor(15)
-        if let stepCount = dict["stepCount"] as? Int64, stepCount > 0 {
+        if let stepCount = dict["steps"] as? UInt16, stepCount > 0 {
              virtualPeripheral.send(newValue: dict)
          } else {
              print("No steps detected, not sending to phone")
