@@ -18,31 +18,37 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
     var broadcasting: Bool = false
     
     private let valuesToSendQueue = DispatchQueue(label: "phone_sync_values_queue")
+    private let advertisementQueue = DispatchQueue(label: "advertisement_queue")
+    private var isAdvertising: Bool = false
     
     private var valuesToSend = [[String : Any]]()
     
     func send(newValue: [String: Any]) {
         valuesToSendQueue.async {
             self.valuesToSend.append(newValue)
-            
-            DispatchQueue.main.async {
-                self.startAdvertising()
-            }
+            self.startAdvertising()
         }
     }
     
     func startAdvertising() {
-        if let peripheral = peripheralManager, peripheral.state == .poweredOn, broadcasting, !peripheral.isAdvertising {
-            print("Starting to advertise")
-            
-            peripheral.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [transferService.uuid]])
+        advertisementQueue.sync {
+            if let peripheral = peripheralManager, peripheral.state == .poweredOn, broadcasting, !isAdvertising {
+                print("Starting to advertise")
+                isAdvertising = true
+                
+                peripheral.startAdvertising([CBAdvertisementDataServiceUUIDsKey: [transferService.uuid]])
+            }
         }
     }
     
     func stopAdvertising() {
-        if let peripheral = peripheralManager, peripheral.isAdvertising {
-            print("Stopping advertisement")
-            peripheralManager.stopAdvertising()
+        advertisementQueue.sync {
+            if let _ = peripheralManager, isAdvertising {
+                print("Stopping advertisement")
+                isAdvertising = false
+                
+                peripheralManager.stopAdvertising()
+            }
         }
     }
     
@@ -116,9 +122,6 @@ class PhoneSyncPeripheral: NSObject, CBPeripheralManagerDelegate {
     }
     
     func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
-        if !valuesToSend.isEmpty {
-            startAdvertising()
-        }
     }
     
     func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
