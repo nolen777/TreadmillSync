@@ -10,11 +10,16 @@ import UserNotifications
 
 class NotificationHandler: NSObject, UNUserNotificationCenterDelegate {
     static let handler = NotificationHandler()
+    let formatter = DateComponentsFormatter()
     
     var notificationsAllowed: Bool = true
     
     override init() {
         super.init()
+        
+        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.unitsStyle = .abbreviated
+        formatter.zeroFormattingBehavior = .dropLeading
         
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert]) { granted, error in
@@ -32,13 +37,16 @@ class NotificationHandler: NSObject, UNUserNotificationCenterDelegate {
         completionHandler([.banner])
     }
     
-    func displayNote(stepCount: Int64, distanceInMiles: Double, calorieCount: Int64) {
+    func displayNote(stepCount: Int64, distanceInMiles: Double, calorieCount: Int64, elapsedTime: TimeInterval) {
         if self.notificationsAllowed {
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)
             
             let content = UNMutableNotificationContent()
             content.title = "LifeSpan Workout Synced"
-            content.body = "\(stepCount) steps, \(distanceInMiles) miles, \(calorieCount) calories burned"
+            content.body = """
+                \(stepCount) steps \(distanceInMiles) miles
+                \(calorieCount) calories in \(formatter.string(from: elapsedTime)!)
+                """
             let notification = UNNotificationRequest(identifier: "StepRequest", content: content, trigger: trigger)
             
             let nc = UNUserNotificationCenter.current()
