@@ -81,7 +81,7 @@ class WorkoutConstructor {
                     return
                 }
                 
-                NotificationHandler.handler.displayNote(stepCount: stepCount, distanceInMiles: distanceInMiles, calorieCount: calorieCount)
+                NotificationHandler.handler.displayNote(stepCount: stepCount, distanceInMiles: distanceInMiles, calorieCount: calorieCount, elapsedTime: seconds)
             }
         }
     }
