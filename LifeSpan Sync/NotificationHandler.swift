@@ -17,7 +17,7 @@ class NotificationHandler: NSObject, UNUserNotificationCenterDelegate {
     override init() {
         super.init()
         
-        formatter.allowedUnits = [.hour, .minute, .second]
+        formatter.allowedUnits = [.minute]
         formatter.unitsStyle = .abbreviated
         formatter.zeroFormattingBehavior = .dropLeading
         
@@ -42,11 +42,8 @@ class NotificationHandler: NSObject, UNUserNotificationCenterDelegate {
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)
             
             let content = UNMutableNotificationContent()
-            content.title = "LifeSpan Workout Synced"
-            content.body = """
-                \(stepCount) steps \(distanceInMiles) miles
-                \(calorieCount) calories in \(formatter.string(from: elapsedTime)!)
-                """
+            content.title = "\(stepCount) steps in \(formatter.string(from: elapsedTime)!)"
+            content.body = "\(distanceInMiles) miles, \(calorieCount) calories"
             let notification = UNNotificationRequest(identifier: "StepRequest", content: content, trigger: trigger)
             
             let nc = UNUserNotificationCenter.current()
