@@ -37,13 +37,17 @@ class NotificationHandler: NSObject, UNUserNotificationCenterDelegate {
         completionHandler([.banner])
     }
     
-    func displayNote(stepCount: Int64, distanceInMiles: Double, calorieCount: Int64, elapsedTime: TimeInterval) {
+    func displayNote(thisStepCount: Int64, distanceInMiles: Double, calorieCount: Int64, elapsedTime: TimeInterval, dailyStepCount: Int64? = nil) {
         if self.notificationsAllowed {
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1.0, repeats: false)
             
             let content = UNMutableNotificationContent()
-            content.title = "\(stepCount) steps in \(formatter.string(from: elapsedTime)!)"
-            content.body = "\(distanceInMiles) miles, \(calorieCount) calories"
+            if let dailySteps = dailyStepCount {
+                content.title = "\(thisStepCount) steps (\(dailySteps) today)"
+            } else {
+                content.title = "\(thisStepCount) steps"
+            }
+            content.body = "in \(formatter.string(from: elapsedTime)!), \(distanceInMiles) miles, \(calorieCount) calories"
             let notification = UNNotificationRequest(identifier: "StepRequest", content: content, trigger: trigger)
             
             let nc = UNUserNotificationCenter.current()
