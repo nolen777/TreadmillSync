@@ -100,13 +100,57 @@ class WorkoutConstructor {
             
             let distanceSample = HKQuantitySample(type: distanceType, quantity: distance, start: startDate, end: endDate)
             
-            store.add([stepSample, activeEnergySample, distanceSample], to: indoorWalk) { (success, error) -> Void in
+            store.add([stepSample, activeEnergySample, distanceSample], to: indoorWalk) { [self] (success, error) -> Void in
                 guard success else {
                     print("Failed to add steps with error \(String(describing: error))")
                     return
                 }
                 
-                NotificationHandler.handler.displayNote(stepCount: stepCount, distanceInMiles: distanceInMiles, calorieCount: calorieCount, elapsedTime: seconds)
+                let calendar = NSCalendar.current
+                let now = Date()
+                let components = calendar.dateComponents([.year, .month, .day], from: now)
+                    
+                guard let startDate = calendar.date(from: components) else {
+                    fatalError("*** Unable to create the start date ***")
+                }
+                 
+                guard let endDate = calendar.date(byAdding: .day, value: 1, to: startDate) else {
+                    fatalError("*** Unable to create the end date ***")
+                }
+
+                let today = HKQuery.predicateForSamples(withStart: startDate, end: endDate, options: [])
+                
+                let query = HKSampleQuery(
+                    sampleType: stepCountType,
+                    predicate: today,
+                    limit: Int(HKObjectQueryNoLimit),
+                    sortDescriptors: nil)
+                { query, results, error in
+                    if let samples = results as? [HKQuantitySample]  {
+                        NotificationHandler.handler.displayNote(
+                            thisStepCount: stepCount,
+                            distanceInMiles: distanceInMiles,
+                            calorieCount: calorieCount,
+                            elapsedTime: seconds,
+                            dailyStepCount: samples.map { (Int64)($0.quantity.doubleValue(for: HKUnit.count())) }.reduce(0, +)
+                        )
+                    } else {
+                        print("Failed to get daily samples")
+                        if let err = error {
+                            print("error: \(err)")
+                        }
+                        
+                        NotificationHandler.handler.displayNote(
+                            thisStepCount: stepCount,
+                            distanceInMiles: distanceInMiles,
+                            calorieCount: calorieCount,
+                            elapsedTime: seconds
+                        )
+                        return
+                    }
+                }
+                
+                store.execute(query)
             }
         }
     }
