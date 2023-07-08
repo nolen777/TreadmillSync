@@ -76,7 +76,7 @@ class BluetoothController: NSObject {
         }
         
         func startCommands() -> Void {
-            state = .querying(index: 0)
+            state = .initializing(index: 0)
             sendNextCommand()
         }
         
@@ -161,7 +161,7 @@ class BluetoothController: NSObject {
                 break
                 
             case .querying(let commandIndex):
-                guard value[0] == 0xa1, value[1] == 0xaa else {
+                guard value[0] == 0xa1 else {
                     print("unexpected value \(value.hexEncodedString()) in query result")
                     return
                 }

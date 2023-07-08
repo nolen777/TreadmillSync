@@ -47,7 +47,7 @@ class NotificationHandler: NSObject, UNUserNotificationCenterDelegate {
             } else {
                 content.title = "\(thisStepCount) steps"
             }
-            content.body = "in \(formatter.string(from: elapsedTime)!), \(distanceInMiles) miles, \(calorieCount) calories"
+            content.body = "\(formatter.string(from: elapsedTime)!), \(distanceInMiles) miles, \(calorieCount) calories"
             let notification = UNNotificationRequest(identifier: "StepRequest", content: content, trigger: trigger)
             
             let nc = UNUserNotificationCenter.current()
