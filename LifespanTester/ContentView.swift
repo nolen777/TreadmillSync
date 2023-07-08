@@ -10,7 +10,6 @@ import SwiftUI
 struct ContentView: View {
     let btc = BluetoothController()
     @State var listenForBluetooth: Bool
-    @State var broadcastWorkouts: Bool
     
     var body: some View {
         VStack {
@@ -19,15 +18,9 @@ struct ContentView: View {
             .onChange(of: listenForBluetooth) { newValue in
                 btc.listening = newValue
             }
-            Toggle("Broadcast Workouts",
-                   isOn: $broadcastWorkouts)
-            .onChange(of: broadcastWorkouts) { newValue in
-                btc.virtualPeripheral.broadcasting = newValue
-            }
         }
         .padding().onAppear {
             btc.setUp()
-            btc.virtualPeripheral.broadcasting = broadcastWorkouts
             btc.listening = listenForBluetooth
         }
     }
@@ -35,6 +28,6 @@ struct ContentView: View {
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView(listenForBluetooth: true, broadcastWorkouts: true)
+        ContentView(listenForBluetooth: true)
     }
 }

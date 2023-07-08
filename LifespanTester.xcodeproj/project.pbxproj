@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AF2BAA282A59D47500E936CD /* DataHexStringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB49C2940EDA40086F279 /* DataHexStringExtension.swift */; };
 		AF4EB466293823010086F279 /* LifespanTesterApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB465293823010086F279 /* LifespanTesterApp.swift */; };
 		AF4EB468293823010086F279 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB467293823010086F279 /* ContentView.swift */; };
 		AF4EB46A293823010086F279 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AF4EB469293823010086F279 /* Assets.xcassets */; };
@@ -16,7 +17,6 @@
 		AF4EB484293823020086F279 /* LifespanTesterUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB483293823020086F279 /* LifespanTesterUITestsLaunchTests.swift */; };
 		AF4EB491293823ED0086F279 /* BluetoothController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB490293823ED0086F279 /* BluetoothController.swift */; };
 		AF4EB493293F09480086F279 /* LifeSpanVirtualTreadmill.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB492293F09480086F279 /* LifeSpanVirtualTreadmill.swift */; };
-		AF4EB495293F0A6D0086F279 /* PhoneSyncPeripheral.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB494293F0A6D0086F279 /* PhoneSyncPeripheral.swift */; };
 		AF4EB4972940667B0086F279 /* LifeSpanCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB4962940667B0086F279 /* LifeSpanCommands.swift */; };
 		AF4EB499294068580086F279 /* PhoneSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB498294068580086F279 /* PhoneSyncService.swift */; };
 		AF4EB49B2940DFA90086F279 /* LifeSpanDataConversions.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB49A2940DFA90086F279 /* LifeSpanDataConversions.swift */; };
@@ -28,10 +28,12 @@
 		AF4EB4B6294156340086F279 /* LifeSpan_SyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB4B5294156340086F279 /* LifeSpan_SyncTests.swift */; };
 		AF4EB4C0294156340086F279 /* LifeSpan_SyncUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB4BF294156340086F279 /* LifeSpan_SyncUITests.swift */; };
 		AF4EB4C2294156340086F279 /* LifeSpan_SyncUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB4C1294156340086F279 /* LifeSpan_SyncUITestsLaunchTests.swift */; };
-		AF4EB4CD294156960086F279 /* BluetoothWorkoutReceiver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB4CC294156960086F279 /* BluetoothWorkoutReceiver.swift */; };
 		AF4EB4CE2941581F0086F279 /* PhoneSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB498294068580086F279 /* PhoneSyncService.swift */; };
 		AF4EB4D02941A9660086F279 /* WorkoutConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB4CF2941A9660086F279 /* WorkoutConstructor.swift */; };
 		AF4EB4D4294245AE0086F279 /* NotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB4D3294245AE0086F279 /* NotificationHandler.swift */; };
+		AFEC9D172A5A20C800BCA1EC /* APNsSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEC9D162A5A20C800BCA1EC /* APNsSender.swift */; };
+		AFEC9D192A5B0E9E00BCA1EC /* AuthKey_CCLSBA4KRH.p8 in Resources */ = {isa = PBXBuildFile; fileRef = AFEC9D182A5B0E9E00BCA1EC /* AuthKey_CCLSBA4KRH.p8 */; };
+		AFEC9D222A5B2D3700BCA1EC /* APNsSecretData.json in Resources */ = {isa = PBXBuildFile; fileRef = AFEC9D212A5B2D3700BCA1EC /* APNsSecretData.json */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -79,7 +81,6 @@
 		AF4EB483293823020086F279 /* LifespanTesterUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifespanTesterUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		AF4EB490293823ED0086F279 /* BluetoothController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothController.swift; sourceTree = "<group>"; };
 		AF4EB492293F09480086F279 /* LifeSpanVirtualTreadmill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeSpanVirtualTreadmill.swift; sourceTree = "<group>"; };
-		AF4EB494293F0A6D0086F279 /* PhoneSyncPeripheral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSyncPeripheral.swift; sourceTree = "<group>"; };
 		AF4EB4962940667B0086F279 /* LifeSpanCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeSpanCommands.swift; sourceTree = "<group>"; };
 		AF4EB498294068580086F279 /* PhoneSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhoneSyncService.swift; sourceTree = "<group>"; };
 		AF4EB49A2940DFA90086F279 /* LifeSpanDataConversions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeSpanDataConversions.swift; sourceTree = "<group>"; };
@@ -94,11 +95,13 @@
 		AF4EB4BB294156340086F279 /* LifeSpan SyncUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "LifeSpan SyncUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AF4EB4BF294156340086F279 /* LifeSpan_SyncUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeSpan_SyncUITests.swift; sourceTree = "<group>"; };
 		AF4EB4C1294156340086F279 /* LifeSpan_SyncUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeSpan_SyncUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		AF4EB4CC294156960086F279 /* BluetoothWorkoutReceiver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BluetoothWorkoutReceiver.swift; sourceTree = "<group>"; };
 		AF4EB4CF2941A9660086F279 /* WorkoutConstructor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutConstructor.swift; sourceTree = "<group>"; };
 		AF4EB4D1294232460086F279 /* LifeSpan-Sync-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "LifeSpan-Sync-Info.plist"; sourceTree = SOURCE_ROOT; };
 		AF4EB4D2294232530086F279 /* LifeSpan Sync.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "LifeSpan Sync.entitlements"; sourceTree = "<group>"; };
 		AF4EB4D3294245AE0086F279 /* NotificationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationHandler.swift; sourceTree = "<group>"; };
+		AFEC9D162A5A20C800BCA1EC /* APNsSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNsSender.swift; sourceTree = "<group>"; };
+		AFEC9D182A5B0E9E00BCA1EC /* AuthKey_CCLSBA4KRH.p8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AuthKey_CCLSBA4KRH.p8; sourceTree = "<group>"; };
+		AFEC9D212A5B2D3700BCA1EC /* APNsSecretData.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = APNsSecretData.json; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +179,7 @@
 		AF4EB464293823010086F279 /* LifespanTester */ = {
 			isa = PBXGroup;
 			children = (
+				AFEC9D182A5B0E9E00BCA1EC /* AuthKey_CCLSBA4KRH.p8 */,
 				AF4EB465293823010086F279 /* LifespanTesterApp.swift */,
 				AF4EB467293823010086F279 /* ContentView.swift */,
 				AF4EB469293823010086F279 /* Assets.xcassets */,
@@ -187,7 +191,8 @@
 				AF4EB49A2940DFA90086F279 /* LifeSpanDataConversions.swift */,
 				AF4EB492293F09480086F279 /* LifeSpanVirtualTreadmill.swift */,
 				AF4EB498294068580086F279 /* PhoneSyncService.swift */,
-				AF4EB494293F0A6D0086F279 /* PhoneSyncPeripheral.swift */,
+				AFEC9D162A5A20C800BCA1EC /* APNsSender.swift */,
+				AFEC9D212A5B2D3700BCA1EC /* APNsSecretData.json */,
 			);
 			path = LifespanTester;
 			sourceTree = "<group>";
@@ -226,7 +231,6 @@
 				AF4EB4A6294156330086F279 /* ContentView.swift */,
 				AF4EB4A8294156340086F279 /* Assets.xcassets */,
 				AF4EB4AA294156340086F279 /* Preview Content */,
-				AF4EB4CC294156960086F279 /* BluetoothWorkoutReceiver.swift */,
 				AF4EB4CF2941A9660086F279 /* WorkoutConstructor.swift */,
 				AF4EB4D3294245AE0086F279 /* NotificationHandler.swift */,
 			);
@@ -274,6 +278,8 @@
 			dependencies = (
 			);
 			name = LifespanTester;
+			packageProductDependencies = (
+			);
 			productName = LifespanTester;
 			productReference = AF4EB462293823010086F279 /* LifespanTester.app */;
 			productType = "com.apple.product-type.application";
@@ -375,7 +381,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1410;
-				LastUpgradeCheck = 1410;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					AF4EB461293823010086F279 = {
 						CreatedOnToolsVersion = 14.1;
@@ -410,6 +416,8 @@
 				Base,
 			);
 			mainGroup = AF4EB459293823010086F279;
+			packageReferences = (
+			);
 			productRefGroup = AF4EB463293823010086F279 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -429,6 +437,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AFEC9D192A5B0E9E00BCA1EC /* AuthKey_CCLSBA4KRH.p8 in Resources */,
+				AFEC9D222A5B2D3700BCA1EC /* APNsSecretData.json in Resources */,
 				AF4EB46D293823010086F279 /* Preview Assets.xcassets in Resources */,
 				AF4EB46A293823010086F279 /* Assets.xcassets in Resources */,
 			);
@@ -481,11 +491,11 @@
 				AF4EB493293F09480086F279 /* LifeSpanVirtualTreadmill.swift in Sources */,
 				AF4EB468293823010086F279 /* ContentView.swift in Sources */,
 				AF4EB499294068580086F279 /* PhoneSyncService.swift in Sources */,
-				AF4EB495293F0A6D0086F279 /* PhoneSyncPeripheral.swift in Sources */,
 				AF4EB49D2940EDA40086F279 /* DataHexStringExtension.swift in Sources */,
 				AF4EB491293823ED0086F279 /* BluetoothController.swift in Sources */,
 				AF4EB49B2940DFA90086F279 /* LifeSpanDataConversions.swift in Sources */,
 				AF4EB466293823010086F279 /* LifespanTesterApp.swift in Sources */,
+				AFEC9D172A5A20C800BCA1EC /* APNsSender.swift in Sources */,
 				AF4EB4972940667B0086F279 /* LifeSpanCommands.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -511,11 +521,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AF2BAA282A59D47500E936CD /* DataHexStringExtension.swift in Sources */,
 				AF4EB4D02941A9660086F279 /* WorkoutConstructor.swift in Sources */,
 				AF4EB4D4294245AE0086F279 /* NotificationHandler.swift in Sources */,
 				AF4EB4A7294156330086F279 /* ContentView.swift in Sources */,
 				AF4EB4CE2941581F0086F279 /* PhoneSyncService.swift in Sources */,
-				AF4EB4CD294156960086F279 /* BluetoothWorkoutReceiver.swift in Sources */,
 				AF4EB4A5294156330086F279 /* LifeSpan_SyncApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -596,6 +606,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
@@ -613,7 +624,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.6;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -656,6 +666,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -667,7 +678,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 12.6;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = macosx;
@@ -685,6 +695,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"LifespanTester/Preview Content\"";
 				DEVELOPMENT_TEAM = UWJ88DX8WQ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -713,6 +724,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_ASSET_PATHS = "\"LifespanTester/Preview Content\"";
 				DEVELOPMENT_TEAM = UWJ88DX8WQ;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -739,6 +751,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = UWJ88DX8WQ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 12.6;
@@ -758,6 +771,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = UWJ88DX8WQ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 12.6;
@@ -776,6 +790,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = UWJ88DX8WQ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
@@ -793,6 +808,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = UWJ88DX8WQ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
