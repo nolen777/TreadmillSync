@@ -8,8 +8,6 @@
 import SwiftUI
 
 struct ContentView: View {
-    let receiver = BluetoothWorkoutReceiver()
-    
     var body: some View {
         VStack {
             Image(systemName: "globe")
@@ -17,9 +15,7 @@ struct ContentView: View {
                 .foregroundColor(.accentColor)
             Text("Hello, world!")
         }
-        .padding().onAppear {
-            receiver.setUp()
-        }
+        .padding()
     }
 }
 

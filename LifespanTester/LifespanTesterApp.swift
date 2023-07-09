@@ -11,7 +11,7 @@ import SwiftUI
 struct LifespanTesterApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView(listenForBluetooth: true, broadcastWorkouts: true)
+            ContentView(listenForBluetooth: true)
         }
     }
 }

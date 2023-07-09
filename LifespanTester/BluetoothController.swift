@@ -10,8 +10,7 @@ import CoreBluetooth
 
 class BluetoothController: NSObject {
     private var centralManager: CBCentralManager!
-    private var peripheralManager: CBPeripheralManager!
-    let virtualPeripheral = PhoneSyncPeripheral()
+    let apnsSender = APNsSender()
     
     var session: LifeSpanSession?
     var listening: Bool = false {
@@ -47,7 +46,6 @@ class BluetoothController: NSObject {
     
     func setUp() {
         centralManager = CBCentralManager(delegate: self, queue: nil)
-        peripheralManager = CBPeripheralManager(delegate: virtualPeripheral, queue: nil)
     }
     
     class LifeSpanSession: NSObject, CBPeripheralDelegate {
@@ -237,7 +235,6 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
         if peripheral.name == "LifeSpan" {
             session = LifeSpanSession(peripheral: peripheral, finishedCallback: sessionFinished, abortedCallback: sessionAborted)
             centralManager.connect(peripheral)
-            virtualPeripheral.startAdvertising()
         }
     }
     
@@ -265,10 +262,9 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     func sessionFinished(peripheral: CBPeripheral, dict: [String: Any]) {
         stopListeningFor(15)
         if let stepCount = dict["steps"] as? UInt16, stepCount > 0 {
-             virtualPeripheral.send(newValue: dict)
+            apnsSender.send(dict)
          } else {
              print("No steps detected, not sending to phone")
-             virtualPeripheral.stopAdvertising()
          }
         centralManager.cancelPeripheralConnection(peripheral)
         
