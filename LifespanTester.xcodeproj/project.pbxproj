@@ -102,6 +102,7 @@
 		AF4EB4D2294232530086F279 /* LifeSpan Sync.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "LifeSpan Sync.entitlements"; sourceTree = "<group>"; };
 		AF4EB4D3294245AE0086F279 /* NotificationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationHandler.swift; sourceTree = "<group>"; };
 		AF6504D12AC4F93F00662D64 /* DeviceKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceKeyManager.swift; sourceTree = "<group>"; };
+		AF6504D42AC5026100662D64 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		AFEC9D162A5A20C800BCA1EC /* APNsSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNsSender.swift; sourceTree = "<group>"; };
 		AFEC9D182A5B0E9E00BCA1EC /* AuthKey_CCLSBA4KRH.p8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AuthKey_CCLSBA4KRH.p8; sourceTree = "<group>"; };
 		AFEC9D212A5B2D3700BCA1EC /* APNsSecretData.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = APNsSecretData.json; sourceTree = "<group>"; };
@@ -183,6 +184,7 @@
 		AF4EB464293823010086F279 /* LifespanTester */ = {
 			isa = PBXGroup;
 			children = (
+				AF6504D42AC5026100662D64 /* Info.plist */,
 				AFEC9D182A5B0E9E00BCA1EC /* AuthKey_CCLSBA4KRH.p8 */,
 				AF4EB465293823010086F279 /* LifespanTesterApp.swift */,
 				AF4EB467293823010086F279 /* ContentView.swift */,
@@ -715,12 +717,14 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LifespanTester/Info.plist;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Syncs with treadmill";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dancrosby.LifespanTester;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -744,12 +748,14 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LifespanTester/Info.plist;
 				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Syncs with treadmill";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.dancrosby.LifespanTester;
 				PRODUCT_NAME = "$(TARGET_NAME)";
