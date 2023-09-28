@@ -9,6 +9,7 @@ import SwiftUI
 
 class AppDelegate: NSObject, UIApplicationDelegate {
     private let workoutConstructor = WorkoutConstructor()
+    private let fileManager = FileManager.default
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         application.registerForRemoteNotifications()
@@ -16,7 +17,12 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        print("Device token: \(deviceToken.hexEncodedString())")
+        let hexToken = deviceToken.hexEncodedString()
+        print("Device token: \(hexToken)")
+        
+        Task {
+            try! await DeviceKeyManager.shared.register(hexToken: hexToken)
+        }
     }
     
     func application(

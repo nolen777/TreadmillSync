@@ -31,6 +31,8 @@
 		AF4EB4CE2941581F0086F279 /* PhoneSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB498294068580086F279 /* PhoneSyncService.swift */; };
 		AF4EB4D02941A9660086F279 /* WorkoutConstructor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB4CF2941A9660086F279 /* WorkoutConstructor.swift */; };
 		AF4EB4D4294245AE0086F279 /* NotificationHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF4EB4D3294245AE0086F279 /* NotificationHandler.swift */; };
+		AF6504D22AC4F93F00662D64 /* DeviceKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF6504D12AC4F93F00662D64 /* DeviceKeyManager.swift */; };
+		AF6504D32AC4F93F00662D64 /* DeviceKeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF6504D12AC4F93F00662D64 /* DeviceKeyManager.swift */; };
 		AFEC9D172A5A20C800BCA1EC /* APNsSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFEC9D162A5A20C800BCA1EC /* APNsSender.swift */; };
 		AFEC9D192A5B0E9E00BCA1EC /* AuthKey_CCLSBA4KRH.p8 in Resources */ = {isa = PBXBuildFile; fileRef = AFEC9D182A5B0E9E00BCA1EC /* AuthKey_CCLSBA4KRH.p8 */; };
 		AFEC9D222A5B2D3700BCA1EC /* APNsSecretData.json in Resources */ = {isa = PBXBuildFile; fileRef = AFEC9D212A5B2D3700BCA1EC /* APNsSecretData.json */; };
@@ -99,6 +101,7 @@
 		AF4EB4D1294232460086F279 /* LifeSpan-Sync-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "LifeSpan-Sync-Info.plist"; sourceTree = SOURCE_ROOT; };
 		AF4EB4D2294232530086F279 /* LifeSpan Sync.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "LifeSpan Sync.entitlements"; sourceTree = "<group>"; };
 		AF4EB4D3294245AE0086F279 /* NotificationHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationHandler.swift; sourceTree = "<group>"; };
+		AF6504D12AC4F93F00662D64 /* DeviceKeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceKeyManager.swift; sourceTree = "<group>"; };
 		AFEC9D162A5A20C800BCA1EC /* APNsSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APNsSender.swift; sourceTree = "<group>"; };
 		AFEC9D182A5B0E9E00BCA1EC /* AuthKey_CCLSBA4KRH.p8 */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = AuthKey_CCLSBA4KRH.p8; sourceTree = "<group>"; };
 		AFEC9D212A5B2D3700BCA1EC /* APNsSecretData.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = APNsSecretData.json; sourceTree = "<group>"; };
@@ -153,6 +156,7 @@
 		AF4EB459293823010086F279 = {
 			isa = PBXGroup;
 			children = (
+				AF6504D02AC4F91C00662D64 /* LifespanShared */,
 				AF4EB464293823010086F279 /* LifespanTester */,
 				AF4EB476293823020086F279 /* LifespanTesterTests */,
 				AF4EB480293823020086F279 /* LifespanTesterUITests */,
@@ -260,6 +264,14 @@
 				AF4EB4C1294156340086F279 /* LifeSpan_SyncUITestsLaunchTests.swift */,
 			);
 			path = "LifeSpan SyncUITests";
+			sourceTree = "<group>";
+		};
+		AF6504D02AC4F91C00662D64 /* LifespanShared */ = {
+			isa = PBXGroup;
+			children = (
+				AF6504D12AC4F93F00662D64 /* DeviceKeyManager.swift */,
+			);
+			path = LifespanShared;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -491,6 +503,7 @@
 				AF4EB493293F09480086F279 /* LifeSpanVirtualTreadmill.swift in Sources */,
 				AF4EB468293823010086F279 /* ContentView.swift in Sources */,
 				AF4EB499294068580086F279 /* PhoneSyncService.swift in Sources */,
+				AF6504D22AC4F93F00662D64 /* DeviceKeyManager.swift in Sources */,
 				AF4EB49D2940EDA40086F279 /* DataHexStringExtension.swift in Sources */,
 				AF4EB491293823ED0086F279 /* BluetoothController.swift in Sources */,
 				AF4EB49B2940DFA90086F279 /* LifeSpanDataConversions.swift in Sources */,
@@ -527,6 +540,7 @@
 				AF4EB4A7294156330086F279 /* ContentView.swift in Sources */,
 				AF4EB4CE2941581F0086F279 /* PhoneSyncService.swift in Sources */,
 				AF4EB4A5294156330086F279 /* LifeSpan_SyncApp.swift in Sources */,
+				AF6504D32AC4F93F00662D64 /* DeviceKeyManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
