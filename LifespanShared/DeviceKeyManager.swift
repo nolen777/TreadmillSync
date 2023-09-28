@@ -29,7 +29,10 @@ class DeviceKeyManager {
             try fileManager.createDirectory(at: driveURL, withIntermediateDirectories: false)
         }
     
-        keysPath = driveURL.appendingPathComponent("deviceKeys.txt").path
+        let keysURL = driveURL.appendingPathComponent("deviceKeys.txt")
+        try fileManager.startDownloadingUbiquitousItem(at: keysURL)
+        
+        keysPath = keysURL.path
     }
     
     public func getKeys() async -> Set<String> {

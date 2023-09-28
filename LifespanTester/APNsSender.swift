@@ -20,7 +20,6 @@ extension Data {
 struct APNsSecretInfo : Decodable {
     let keyId: String
     let asnKeyBase64EncodedData: String
-    let deviceToken: String
     let teamId: String
     
     public static let shared: APNsSecretInfo = makeSecretInfo()!
@@ -129,7 +128,7 @@ class APNsSender : NSObject {
         return "\(d).\(sig)"
     }
     
-    func send(timestamp: String, timeInSeconds: Int, steps: Int, distanceInMiles: Double, calories: Int, to deviceToken: String) {
+    func send(timestamp: String, timeInSeconds: Int, steps: Int, distanceInMiles: Double, calories: Int) async {
         let dict: [String : Any] = [
             "timestamp" : timestamp,
             "timeInSeconds" : timeInSeconds,
@@ -138,42 +137,44 @@ class APNsSender : NSObject {
             "calories" : calories
         ]
         
-        send(dict)
+        await send(dict)
     }
     
-    func send(_ newValue: [String: Any]) {
-        let url = URL(string: "https://api.development.push.apple.com/3/device/\(APNsSecretInfo.shared.deviceToken)")!
-        guard let authToken = APNsSender.authorizationToken() else {
-            print("Unable to get auth token")
-            return
+    func send(_ newValue: [String: Any]) async {
+        for deviceToken in await DeviceKeyManager.shared.getKeys() {
+            let url = URL(string: "https://api.development.push.apple.com/3/device/\(deviceToken)")!
+            guard let authToken = APNsSender.authorizationToken() else {
+                print("Unable to get auth token")
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("bearer \(authToken)", forHTTPHeaderField: "authorization")
+            request.setValue("background", forHTTPHeaderField: "apns-push-type")
+            request.setValue(UUID().uuidString, forHTTPHeaderField: "apns-id")
+            request.setValue("5", forHTTPHeaderField: "apns-priority")
+            request.setValue("com.dancrosby.LifeSpan-Sync", forHTTPHeaderField: "apns-topic")
+            
+            let aps = ["aps": ["content-available": 1] ].merging(newValue) { (a, b) in a }
+            
+            let jsonData = try! JSONSerialization.data(withJSONObject: aps)
+            
+            let task = URLSession.shared.uploadTask(with: request, from: jsonData) { data, response, error in
+                if let error = error {
+                    print ("error: \(error)")
+                    return
+                }
+                guard let response = response as? HTTPURLResponse else {
+                    print("Not an HTTPURLResponse")
+                    return
+                }
+                guard (200...299).contains(response.statusCode) else {
+                    print ("server error \(String(describing: response))")
+                    return
+                }
+            }
+            task.resume()
         }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("bearer \(authToken)", forHTTPHeaderField: "authorization")
-        request.setValue("background", forHTTPHeaderField: "apns-push-type")
-        request.setValue(UUID().uuidString, forHTTPHeaderField: "apns-id")
-        request.setValue("5", forHTTPHeaderField: "apns-priority")
-        request.setValue("com.dancrosby.LifeSpan-Sync", forHTTPHeaderField: "apns-topic")
-        
-        let aps = ["aps": ["content-available": 1] ].merging(newValue) { (a, b) in a }
-        
-        let jsonData = try! JSONSerialization.data(withJSONObject: aps)
-        
-        let task = URLSession.shared.uploadTask(with: request, from: jsonData) { data, response, error in
-            if let error = error {
-                print ("error: \(error)")
-                return
-            }
-            guard let response = response as? HTTPURLResponse else {
-                print("Not an HTTPURLResponse")
-                return
-            }
-            guard (200...299).contains(response.statusCode) else {
-                print ("server error \(String(describing: response))")
-                return
-            }
-        }
-        task.resume()
     }
 }

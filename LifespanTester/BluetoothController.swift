@@ -262,10 +262,10 @@ extension BluetoothController: CBCentralManagerDelegate, CBPeripheralDelegate {
     func sessionFinished(peripheral: CBPeripheral, dict: [String: Any]) {
         stopListeningFor(15)
         if let stepCount = dict["steps"] as? UInt16, stepCount > 0 {
-            apnsSender.send(dict)
-         } else {
-             print("No steps detected, not sending to phone")
-         }
+            Task { await apnsSender.send(dict) }
+        } else {
+            print("No steps detected, not sending to phone")
+        }
         centralManager.cancelPeripheralConnection(peripheral)
         
         session = nil
